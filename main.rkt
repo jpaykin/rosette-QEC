@@ -16,8 +16,6 @@
        ((bitvector (pauli-width P)) (pauli-xs P))
        ((bitvector (pauli-width P)) (pauli-zs P))))
 
-
-
 (define (bool-at i v)
   (bitvector->bool (bit i v)))
 
@@ -38,12 +36,6 @@
 (define (commute? P1 P2)
   (define w (pauli-width P1))
   (assert (eq? (pauli-width P2) w))
-  ; (displayln (list "commute? " P1 " " P2))
-  ; (displayln (list "\t" (bv-inner-product w (pauli-xs P1) (pauli-zs P2))
-  ;                       "\t"
-  ;                       (bv-inner-product w (pauli-zs P1) (pauli-xs P2))))
-  ; (displayln (bvsub  (bv-inner-product w (pauli-xs P1) (pauli-zs P2))
-  ;           (bv-inner-product w (pauli-zs P1) (pauli-xs P2))))
   (bvzero?
     (bvsub  (bv-inner-product w (pauli-xs P1) (pauli-zs P2))
             (bv-inner-product w (pauli-zs P1) (pauli-xs P2))))
@@ -132,17 +124,27 @@
      (pretty-pauli1 (pauli1-at i P)))
    ""))
 
+; Return an identity Pauli of length width
+(define (PauliI width)
+  (pauli width (bv 0 width) (bv 0 width)))
+
+
+
+(define (pauli-weight P)
+  (define weight 0)
+  (for ([i (in-range (pauli-width P))])
+    (cond
+      [ (not (eq? (pauli1-at i P) (symbol->pauli1 'I)))
+        (set! weight (add1 weight))
+      ]
+    )
+  )
+  weight
+)
+
 
 (define example1 (pauli 2 (bv #b01 2) (bv #b10 2)))
-(displayln (pauli1-at 0 example1))
-(displayln (pretty-pauli example1))
-
 (define example2 (symbols->pauli '(X Z)))
-(displayln (pretty-pauli example2))
-
-(displayln (commute? (symbols->pauli '(X I)) (symbols->pauli '(I X))))
-
-
 
 ;; Read column 0..width-1 from X, then width..2*width-1 from Z.
 (define (pauli-column-bit P column)
@@ -152,7 +154,7 @@
       (bit (- column width) (pauli-zs P))))
 
 ;; XOR two Pauli vectors; this is Pauli multiplication modulo global phase.
-(define (pauli-xor P1 P2)
+(define (pauli-mult P1 P2)
   (pauli (pauli-width P1)
          (bvxor (pauli-xs P1) (pauli-xs P2))
          (bvxor (pauli-zs P1) (pauli-zs P2))))
@@ -189,31 +191,30 @@
             #:unless (= row-index pivot-count))
         (define row (vector-ref rows row-index))
         (when (bitvector->bool (pauli-column-bit row column))
-          (vector-set! rows row-index (pauli-xor row pivot))))
+          (vector-set! rows row-index (pauli-mult row pivot))))
       (set! pivot-columns (cons column pivot-columns))
       (set! pivot-count (add1 pivot-count))))
   (values (for/list ([row-index (in-range pivot-count)])
             (vector-ref rows row-index))
           (reverse pivot-columns)))
 
-(define (print-generators generators)
+(define (print-paulis generators)
   (for ([P (in-list generators)])
     (displayln (pretty-pauli P))))
 
-
-(println "INITIAL GENERATORS")
-(define gens
-  (list (symbols->pauli '(Z X))
-        (symbols->pauli '(Y Y))
-  ))
-(print-generators gens)
-(println "REDUCED GENERATORS")
-(let-values ([(basis pivots)
-              (pauli-row-echelon gens
-               2)])
-  (print-generators basis)
-)
-(println "DONE TEST")
+; (println "INITIAL GENERATORS")
+; (define gens
+;   (list (symbols->pauli '(Z X))
+;         (symbols->pauli '(Y Y))
+;   ))
+; (print-paulis gens)
+; (println "REDUCED GENERATORS")
+; (let-values ([(basis pivots)
+;               (pauli-row-echelon gens
+;                2)])
+;   (print-paulis basis)
+; )
+; (println "DONE TEST")
 
 (define (pauli-in-group? P generators)
   (unless (and (wf-pauli? P)
@@ -240,33 +241,117 @@
                 ([pivot (in-list pivots)]
                  [row (in-list basis)])
         (if (bitvector->bool (pauli-column-bit residual pivot))
-            (pauli-xor residual row)
+            (pauli-mult residual row)
             residual)))
     (and (bvzero? (pauli-xs residual))
          (bvzero? (pauli-zs residual)))))
 
-(displayln '(pauli-in-group test))
-(define generators
-  (list (symbols->pauli '(Z X))
-        (symbols->pauli '(Y Y))))
-(print-generators generators)
-(define membership-product
-  (pauli-xor (first generators)
-             (second generators)))
-(unless (and (pauli-in-group? (symbols->pauli '(I I)) generators)
-             (pauli-in-group? (first generators) generators)
-             (pauli-in-group? membership-product generators)
-             (not (pauli-in-group? (symbols->pauli '(X X))
-                                   generators)))
-  (error 'pauli-in-group-test "membership test failed"))
-(displayln 'DONE)
+(define (logical-error? P generators)
+    (&& (not (pauli-in-group? P generators))
+        (andmap (lambda (Q) (commute? P Q)) generators)
+    )
+)
 
-(define-symbolic-pauli px 5)
-(displayln px)
+(define (find-logical-error generators)
+  (assert (wf-generators? generators))
 
-(define sol (solve (begin
-      (assert (not (commute? px (symbols->pauli '(X Z I I X)))))
-      (assert (not (eq? px (symbols->pauli '(I I I I I)))))
-  )))
-;;sol
-(pauli->symbols (evaluate px sol))
+  (println "Trying to find a logical error given generators:")
+  (print-paulis generators)
+
+  (define width (pauli-width (first generators)))
+  (define-symbolic-pauli symbolic-p width)
+  (define sol (solve (assert (logical-error? symbolic-p generators))))
+  (if (unsat? sol)
+    (error "Could not find a logical error")
+    (begin  (define concrete-p (evaluate symbolic-p sol))
+            (println (pretty-pauli concrete-p))
+            concrete-p
+    )
+  ))
+
+(define five-qubit-code
+  (list (symbols->pauli '(X Z Z X I))
+        (symbols->pauli '(I X Z Z X))
+        (symbols->pauli '(X I X Z Z))
+        (symbols->pauli '(Z X I X Z))
+  ))
+
+(define tiny-example
+  (list (symbols->pauli '(X Z Z X I))
+  ))
+
+;(find-loagical-error five-qubit-code)
+
+(define (find-logical-error-generators generators)
+  (assert (wf-generators? generators))
+
+  (define width (pauli-width (first generators)))
+  (define num-log-errors (- width (length generators)))
+
+  (define errors (make-vector num-log-errors (PauliI width)))
+  (for ([i (in-range num-log-errors)])
+    (define new-generators (append generators (vector->list errors)))
+    (define P (find-logical-error new-generators))
+    (vector-set! errors i P)
+  )
+  (vector->list errors)
+)
+
+;(print-paulis (find-logical-error-generators tiny-example))
+
+(define RAND (make-pseudo-random-generator))
+
+(define (sample-bool)
+  (eq? 1 (random 2 RAND))
+)
+
+; Assume generators are a list of Paulis
+(define (sample-group generators)
+  (assert (wf-generators? generators))
+
+  (define width (pauli-width (first generators)))
+  (define P (PauliI width))
+
+  (for ([G (in-list generators)])
+    (cond
+      [(sample-bool)   (set! P (pauli-mult P G))]
+    ))
+  P
+)
+
+; Assume generators and error-generators are lists
+(define (sample-logical-error generators error-generators)
+  (define errs (list->vector error-generators))
+  
+  ; pick an equivalence class (one of the error generators)
+  (let ([i (random (length error-generators) RAND)]
+        [P (sample-group generators)]
+        )
+    (pauli-mult P (vector-ref errs i))
+  )
+)
+
+(define (sample-logical-error* generators)
+  (sample-logical-error generators (find-logical-error-generators generators))
+)
+
+
+; Returns Pr(Weight(E) <= k | E is a logical error of generators|)
+(define (probability-weight-given-logical-error k generators num-shots)
+  (define error-generators (find-logical-error-generators generators))
+  (define count 0)
+  (for ([_ (in-range num-shots)])
+    (define P (sample-logical-error generators error-generators))
+    (cond 
+      [(<= (pauli-weight P) k)    (set! count (add1 count))]
+    )
+  )
+  (exact->inexact (/ count num-shots))
+)
+
+; (define err (sample-logical-error* five-qubit-code))
+; (pauli->symbols err)
+; (assert (logical-error? err five-qubit-code))
+; (pauli-weight err)
+
+(probability-weight-given-logical-error 3 five-qubit-code 1000)
