@@ -8,6 +8,10 @@
          ;; constructors
          define-symbolic-pauli
          pauli-id
+         pauli1X
+         pauli1Y
+         pauli1Z
+         pauli1I
          symbol->pauli
          bits->pauli
          symbol->pauli1
@@ -83,12 +87,17 @@
     [(pauli1-z p) 'Z]
     [else 'I]))
 
+(define pauli1X (pauli1 #t #f))
+(define pauli1Y (pauli1 #t #t))
+(define pauli1Z (pauli1 #f #t))
+(define pauli1I (pauli1 #f #f))
+
 (define (symbol->pauli1 p)
   (case p
-    [(I) (pauli1 #f #f)]
-    [(X) (pauli1 #t #f)]
-    [(Z) (pauli1 #f #t)]
-    [(Y) (pauli1 #t #t)]
+    [(I) pauli1I]
+    [(X) pauli1X]
+    [(Z) pauli1Z]
+    [(Y) pauli1Y]
     [else
      (raise-argument-error
       'symbol->pauli1

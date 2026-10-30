@@ -20,7 +20,12 @@
   (check-equal? (pauli->symbols
                  (pauli-mult (symbols->pauli '(X))
                              (symbols->pauli '(X))))
-                '(I)))
+                '(I))
+  (check-equal? (pauli->symbols
+                 (pauli-mult (symbols->pauli '(X))
+                             (symbols->pauli '(Y))
+                             (symbols->pauli '(I))))
+                '(Z)))
 
 
 (test-case "Commutation, group membership, and logical errors"
