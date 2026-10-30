@@ -16,7 +16,12 @@
   (eq? 1 (random 2 RAND)))
 
 (define (sample-group generators)
-  (assert (wf-generators? generators))
+  (unless (wf-generators? generators)
+    (raise-argument-error
+      'sample-group
+      "wf-generators?"
+      generators)
+  )
 
   (define width (pauli-width (first generators)))
   (define P (pauli-id width))
@@ -45,3 +50,4 @@
       [(<= (pauli-weight P) k)
        (set! count (add1 count))]))
   (exact->inexact (/ count num-shots)))
+

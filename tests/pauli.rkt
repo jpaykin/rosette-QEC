@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require rackunit
+         rosette
          "../src/ler/pauli.rkt")
 
 (test-case "Pauli symbol conversion round-trips"
@@ -35,3 +36,22 @@
                     [(Y) '(I Y I)])))
   (check-exn exn:fail:contract? (lambda () (symbol->pauli 2 'X 2))))
 
+(test-case "bits->pauli constructs X_i^bx Z_i^bz"
+  (for* ([bx (in-list '(#f #t))]
+         [bz (in-list '(#f #t))])
+    (define P (bits->pauli 3 1 bx bz))
+    (check-equal? (pauli->symbols P)
+                  (list 'I
+                        (cond [(and bx bz) 'Y]
+                              [bx 'X]
+                              [bz 'Z]
+                              [else 'I])
+                        'I)))
+  (check-exn exn:fail:contract? (lambda () (bits->pauli 3 3 #t #f)))
+  (check-exn exn:fail:contract? (lambda () (bits->pauli 3 1 1 #f))))
+
+(test-case "bits->pauli accepts symbolic Boolean exponents"
+  (define-symbolic bx bz boolean?)
+  (define P (bits->pauli 3 1 bx bz))
+  (check-true (symbolic? (pauli-xs P)))
+  (check-true (symbolic? (pauli-zs P))))

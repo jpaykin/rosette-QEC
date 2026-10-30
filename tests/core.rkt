@@ -1,8 +1,10 @@
 #lang racket/base
 
 (require rackunit
+         rosette
          "../main.rkt"
-         "./pauli.rkt")
+         "./pauli.rkt"
+         "./algebra.rkt")
 
 
 (test-case "symbol->pauli"
@@ -29,3 +31,13 @@
   (check-false (pauli-in-group? zz (list xx)))
   (check-true (logical-error? zz (list xx)))
   (check-false (logical-error? xx (list xx))))
+
+(test-case "define-symbolic-syndrome creates symbolic boolean bits"
+  (define syndrome (define-symbolic-syndrome 3))
+  (check-equal? (length syndrome) 3)
+  (check-true (andmap (lambda (bit)
+                        (and (boolean? bit) (symbolic? bit)))
+                      syndrome))
+  (check-equal? (define-symbolic-syndrome 0) '())
+  (check-exn exn:fail:contract?
+             (lambda () (define-symbolic-syndrome -1))))

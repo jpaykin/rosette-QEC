@@ -9,6 +9,7 @@
          define-symbolic-pauli
          pauli-id
          symbol->pauli
+         bits->pauli
          symbol->pauli1
          symbols->pauli
          ;; boolean validity of Paulis
@@ -57,6 +58,24 @@
            (define-symbolic zs (bitvector n))
            (define name (pauli n xs zs))))]))
 
+(define (bits->pauli n i bx bz)
+  (unless (exact-positive-integer? n)
+    (raise-argument-error 'bits->pauli "exact-positive-integer?" n))
+  (unless (and (exact-nonnegative-integer? i) (< i n))
+    (raise-argument-error
+     'bits->pauli
+     (format "exact integer in [0, ~a)" n)
+     i))
+  (unless (boolean? bx)
+    (raise-argument-error 'bits->pauli "boolean?" bx))
+  (unless (boolean? bz)
+    (raise-argument-error 'bits->pauli "boolean?" bz))
+
+  (define mask (arithmetic-shift 1 (- n i 1)))
+  (pauli n
+         (if bx (bv mask n) (bv 0 n))
+         (if bz (bv mask n) (bv 0 n))))
+
 (define (pauli1->symbol p)
   (cond
     [(and (pauli1-x p) (pauli1-z p)) 'Y]
@@ -88,9 +107,9 @@
      (format "exact integer in [0, ~a)" n)
      i))
   (define single-pauli (symbol->pauli1 p1))
-  (pauli n
-         (bv (if (pauli1-x single-pauli) (arithmetic-shift 1 (- n i 1)) 0) n)
-         (bv (if (pauli1-z single-pauli) (arithmetic-shift 1 (- n i 1)) 0) n)))
+  (bits->pauli n i
+               (pauli1-x single-pauli)
+               (pauli1-z single-pauli)))
 
 ;; Convert a non-empty list of 'I, 'X, 'Y, and 'Z symbols to a Pauli in list order.
 (define (symbols->pauli symbols)
@@ -134,6 +153,8 @@
       [(not (eq? (pauli1-at i P) (symbol->pauli1 'I)))
        (set! weight (add1 weight))]))
   weight)
+
+
 
 ;; Example use-case
 (define example1 (pauli 2 (bv #b01 2) (bv #b10 2)))

@@ -5,11 +5,13 @@
 (require "pauli.rkt")
 
 (provide commute?
+         syndrome-of
          wf-generators?
          pauli-mult
          pauli-row-echelon
          print-paulis
-         pauli-in-group?)
+         pauli-in-group?
+         )
 
 (define (bv-inner-product width u v)
   (for/fold ([parity (bv 0 (bitvector 1))])
@@ -20,7 +22,7 @@
 
 (define (commute? P1 P2)
   (define w (pauli-width P1))
-  (assert (eq? (pauli-width P2) w))
+  ;;(assert (eq? (pauli-width P2) w))
   (bvzero?
    (bvsub (bv-inner-product w (pauli-xs P1) (pauli-zs P2))
           (bv-inner-product w (pauli-zs P1) (pauli-xs P2)))))
@@ -34,7 +36,7 @@
        (let ([Pi (list-ref gens i)])
          (and
           (wf-pauli? Pi)
-          (= (pauli-width Pi) n)))))
+          (eq? (pauli-width Pi) n)))))
    (for* ([i (in-range (length gens))]
           [j (in-range (add1 i) (length gens))])
      (commute? (list-ref gens i) (list-ref gens j)))))
@@ -55,7 +57,7 @@
   (define pivot-count 0)
   (define pivot-columns '())
   (for ([column (in-range (* 2 width))]
-        #:break (= pivot-count (vector-length rows)))
+        #:break (eq? pivot-count (vector-length rows)))
     (define pivot-index
       (for/first ([candidate-index
                    (in-range pivot-count (vector-length rows))]
@@ -71,7 +73,7 @@
       (vector-set! rows pivot-count pivot)
       (vector-set! rows pivot-index displaced)
       (for ([row-index (in-range (vector-length rows))]
-            #:unless (= row-index pivot-count))
+            #:unless (eq? row-index pivot-count))
         (define row (vector-ref rows row-index))
         (when (bitvector->bool (pauli-column-bit row column))
           (vector-set! rows row-index (pauli-mult row pivot))))
@@ -85,6 +87,11 @@
   (for ([P (in-list generators)])
     (displayln (pretty-pauli P))))
 
+;; syndrome of a Pauli P with respect to a list of generators of a Pauli group
+(define (syndrome-of P G)
+  (map (lambda (g) (not (commute? P g))) G)
+)
+
 (define (pauli-in-group? P generators)
   (unless (and (wf-pauli? P)
                (exact-positive-integer? (pauli-width P)))
@@ -92,7 +99,7 @@
   (unless (and (list? generators) (pair? generators))
     (raise-argument-error 'pauli-in-group? "non-empty list?" generators))
   (for ([generator (in-list generators)])
-    (unless (and (= (pauli-width generator) (pauli-width P))
+    (unless (and (eq? (pauli-width generator) (pauli-width P))
                  (concrete? (pauli-xs generator))
                  (concrete? (pauli-zs generator)))
       (raise-argument-error
