@@ -6,8 +6,8 @@
 (provide (struct-out graph)
          edge-index
          edge->pauli
-         plaquette-stabilizer
-         plaquette-stabilizers
+         vertex-stabilizer
+         vertex-stabilizers
          get-faces
          face-stabilizer
          faces-stabilizers
@@ -63,7 +63,7 @@
 ;; -X-- v ---X-
 ;;      |
 ;;      |X
-(define (plaquette-stabilizer g v)
+(define (vertex-stabilizer g v)
     ;; We expect g to have 4 edges connected to v,
     ;; but this doesn't check that
     (define (f neighbor P)
@@ -72,9 +72,9 @@
     (foldr f (pauli-id (length (graph-edges g)))
            (list-ref (graph-adjacencies g) v))
 )
-(define (plaquette-stabilizers g)
+(define (vertex-stabilizers g)
   (for/list ([v (in-range (graph-num-vertices g))])
-    (plaquette-stabilizer g v)))
+    (vertex-stabilizer g v)))
 
 ;; v1 ----Z----- v2
 ;;  |            |
@@ -132,7 +132,7 @@
     (apply face-stabilizer g face)))
 
 (define (stabilizers g)
-    (append (plaquette-stabilizers g) (faces-stabilizers g)))
+    (append (vertex-stabilizers g) (faces-stabilizers g)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Defining the graph structures ;;
@@ -222,5 +222,4 @@
                     n))
 
 (define (toric-code l)
-    (stabilizers (torus-graph l l))
-)
+    (stabilizers (torus-graph l l)))

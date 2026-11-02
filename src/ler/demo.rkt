@@ -3,7 +3,8 @@
 (require "pauli.rkt"
          "algebra.rkt"
          "logical.rkt"
-         "sampling.rkt")
+         "sampling.rkt"
+         "examples/toric-code.rkt")
 
 (provide run-demo)
 
@@ -14,34 +15,34 @@
   ; (displayln symbolic-synd)
   ; (displayln (repetition-code-decoder symbolic-synd))
 
-  (decoder-logical-error?
-    (symbols->pauli '(X X X))
-    repetition-code-decoder
-    repetition-code
-    '()
-    )
+  ; (decoder-logical-error?
+  ;   (symbols->pauli '(X X X))
+  ;   repetition-code-decoder
+  ;   repetition-code
+  ;   '()
+  ;   )
 
-  (define P (symbols->pauli '(X X X)))
-  (println (syndrome-of P repetition-code))
+  ; (define P (symbols->pauli '(X X X)))
+  ; (println (syndrome-of P repetition-code))
 
-  (pauli->symbols
-    (pauli-mult
-      (repetition-code-decoder (syndrome-of P repetition-code))
-      P))
+  ; (pauli->symbols
+  ;   (pauli-mult
+  ;     (repetition-code-decoder (syndrome-of P repetition-code))
+  ;     P))
 
-  (println (decoder-logical-error? P 
-    repetition-code-decoder
-    repetition-code
-    '()))
+  ; (println (decoder-logical-error? P 
+  ;   repetition-code-decoder
+  ;   repetition-code
+  ;   '()))
 
-  (pauli->symbols (find-decoder-logical-error repetition-code-decoder repetition-code '()))
+  ; (pauli->symbols (find-decoder-logical-error repetition-code-decoder repetition-code '()))
 
 
 
-  (for ([P (find-decoder-logical-error-generators repetition-code-decoder repetition-code)])
-    (displayln (pauli->symbols P))
-  )
+  ; (for ([P (find-decoder-logical-error-generators repetition-code-decoder repetition-code)])
+  ;   (displayln (pauli->symbols P))
+  ; )
 
-  ;;(pauli->symbols (find-logical-error repetition-code))
+  (pauli->symbols (find-logical-error (toric-code 5)))
 
   )
