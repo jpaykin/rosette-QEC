@@ -56,6 +56,17 @@
   (list (symbols->pauli '(Z Z I))
         (symbols->pauli '(I Z Z))))
 
+(define shor-nine-qubit-code
+  (list
+    (symbols->pauli '(Z Z I I I I I I I))
+    (symbols->pauli '(I Z Z I I I I I I))
+    (symbols->pauli '(I I I Z Z I I I I))
+    (symbols->pauli '(I I I I Z Z I I I))
+    (symbols->pauli '(I I I I I I Z Z I))
+    (symbols->pauli '(I I I I I I I Z Z))
+    (symbols->pauli '(X X X X X X I I I))
+    (symbols->pauli '(I I I X X X X X X))))
+
 
 (define (find-logical-error-generators generators)
   (unless (wf-generators? generators)
