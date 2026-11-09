@@ -30,9 +30,6 @@
       generators)
   )
 
-  (println "Trying to find a logical error given generators:")
-  (print-paulis generators)
-
   (define width (pauli-width (first generators)))
   (define-symbolic-pauli symbolic-p width)
   (define sol (solve (assert (logical-error? symbolic-p generators))))
@@ -40,7 +37,7 @@
       (error "Could not find a logical error")
       (begin
         (define concrete-p (evaluate symbolic-p sol))
-        (println (pretty-pauli concrete-p))
+        ;(println (pretty-pauli concrete-p))
         concrete-p)))
 
 (define five-qubit-code
@@ -77,14 +74,32 @@
   )
 
   (define width (pauli-width (first generators)))
-  (define num-log-errors (- width (length generators)))
+  ;(print "Width: ")
+  ;(println width)
 
-  (define errors (make-vector num-log-errors (pauli-id width)))
-  (for ([i (in-range num-log-errors)])
-    (define new-generators (append generators (vector->list errors)))
-    (define P (find-logical-error new-generators))
-    (vector-set! errors i P))
-  (vector->list errors))
+  ;(print "num-log-errors: ")
+  ;(println num-log-errors)
+
+  (let-values ([(generators-reduced _)
+                (pauli-row-echelon generators width)])
+    ;(print "reduced form: ")
+    ;(print-paulis generators_reduced)
+
+    (define num-log-errors (- width (length generators-reduced)))
+
+    (print "num-log-errors: ")
+    (println (- width (length generators-reduced)))
+
+
+    (define errors (make-vector num-log-errors (pauli-id width)))
+    (for ([i (in-range num-log-errors)])
+      (define new-generators (append generators-reduced (vector->list errors)))
+      ;(println "New generators found:")
+      ;(print-paulis new-generators)
+      (define P (find-logical-error new-generators))
+      (vector-set! errors i P))
+
+    (vector->list errors)))
 
 (define (bits->bv n b ..)
   (concat (bool->bitvector b)

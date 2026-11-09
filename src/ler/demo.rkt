@@ -43,6 +43,21 @@
   ;   (displayln (pauli->symbols P))
   ; )
 
-  (pauli->symbols (find-logical-error (toric-code 5)))
+
+  (define generators (toric-code 3))
+  ;(print-paulis generators)
+
+  ;(print-paulis (find-logical-error-generators generators))
+
+  (define error-generators (find-logical-error-generators generators))
+  (print-paulis error-generators)
+
+  ;(for ([E (in-list error-generators)])
+      ;(displayln (pauli->symbols E))
+  ;)
+
+  (for ([i (in-range 100)])
+      (println (pauli->symbols (sample-logical-error generators error-generators)))
+  )
 
   )
