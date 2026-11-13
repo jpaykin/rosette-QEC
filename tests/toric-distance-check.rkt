@@ -10,12 +10,12 @@
 
 ;; Count the nonidentity positions of a Pauli operator.
 ;; this is the weight of the Pauli operator.
-(define (weight-of P)
-  (for/sum ([i (in-range (pauli-width P))])
-    (define p (pauli1-at i P))
-    (if (or (pauli1-x p) (pauli1-z p))
-        1
-        0)))
+; (define (weight-of P)
+;   (for/sum ([i (in-range (pauli-width P))])
+;     (define p (pauli1-at i P))
+;     (if (or (pauli1-x p) (pauli1-z p))
+;         1
+;         0)))
 
 ;; Construct a weight-L noncontractible logical operator.
 ;; Q = X_0 X_L X_2L ... X_((L-1)L)
@@ -51,7 +51,7 @@
   ;; Upper bound: construct a logical operator of weight L.
   (define Q (weight-L-logical L n))
 
-  (unless (and (= (weight-of Q) L)
+  (unless (and (= (pauli-weight Q) L)
                (logical-error? Q G))
     (error 'verify-toric-distance
            "constructed operator is not a weight-L logical operator"))
@@ -73,7 +73,7 @@
     (solve
       (assert
         (and (logical-error? E G)
-             (< (weight-of E) L)))))
+             (< (pauli-weight E) L)))))
 
   ;; Display the verification result.
   (cond
@@ -87,7 +87,7 @@
      (define found (evaluate E result))
      (displayln "FAIL: Found a smaller logical error:")
      (displayln (pretty-pauli found))
-     (printf "Weight: ~a\n" (weight-of found))
+     (printf "Weight: ~a\n" (pauli-weight found))
      (error 'verify-toric-distance
             "distance lower bound failed")]
 

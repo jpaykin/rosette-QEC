@@ -154,14 +154,23 @@
 (define (pauli-id width)
   (pauli width (bv 0 width) (bv 0 width)))
 
+;; changed eq? to equal?
+;; eq? checks if they are same object and equal? checks if they are structurally equal and have the same contents.
+; (define (pauli-weight P)
+;   (define weight 0)
+;   (for ([i (in-range (pauli-width P))])
+;     (cond
+;       [(not (equal? (pauli1-at i P) (symbol->pauli1 'I)))
+;        (set! weight (add1 weight))]))
+;   weight)
 
+;; the new pauli-weight directly examines the bitvectors
 (define (pauli-weight P)
-  (define weight 0)
-  (for ([i (in-range (pauli-width P))])
-    (cond
-      [(not (eq? (pauli1-at i P) (symbol->pauli1 'I)))
-       (set! weight (add1 weight))]))
-  weight)
+  (for/sum ([i (in-range (pauli-width P))])
+    (define p (pauli1-at i P))
+    (if (or (pauli1-x p) (pauli1-z p))
+        1
+        0)))
 
 
 
