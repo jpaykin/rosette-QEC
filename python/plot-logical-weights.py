@@ -35,7 +35,7 @@ def main():
     ax.set_xlabel("Pauli weight")
     ax.set_ylabel("Frequency (number of samples)")
     name = f"L={L}" if L is not None else "toric code"
-    ax.set_title(f"Toric code {name}: weights from two logical representatives (N={len(weights)})")
+    ax.set_title(f"Toric code {name}: (N={len(weights)})")
     if L is not None:
         ax.axvline(L, color="gray", linestyle="--", alpha=0.8,
                    label=f"Code distance d={L}")

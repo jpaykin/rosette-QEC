@@ -33,7 +33,7 @@
        (set! P (pauli-mult P G))
        (set! empty? #f)
        ]))
-  (if (and empty (not allow-empty))
+  (if (and empty? (not allow-empty))
     ( ; Pick an arbitrary generator of the group
       list-ref generators (random (length generators) RAND)
     )
@@ -44,7 +44,7 @@
   ; TODO: check that generators is non-empty
   ; TODO: check that error-generators is non-empty
   (define errs (list->vector error-generators))
-  (let ([canonical-err (sample-group generators #:allow-empty #f)]
+  (let ([canonical-err (sample-group error-generators #:allow-empty #f)]
         [P (sample-group generators)])
     (pauli-mult P canonical-err)))
 

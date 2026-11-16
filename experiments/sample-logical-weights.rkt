@@ -20,7 +20,7 @@
     (raise-argument-error 'run-logical-weight-experiment "positive exact integer" shots))
 
 ;; define n as the number of physical qubits in the toric code, which is 2 * L * L
-;;define G as the toric code graph for the given L
+;; define G as the toric code graph for the given L
 
   (define n (* 2 L L))
   (define G (toric-code L))
@@ -49,24 +49,20 @@
             i (pretty-pauli P) (pauli-weight P)))
 
   ;; Each sample is S * P_i, where S is a random stabilizer and
-  ;; P_i is one of the two logical representatives selected above.
+  ;; P_i is one of the logical representatives selected above.
   (define weights
     (for/list ([j (in-range shots)])
       (define P (sample-logical-error G representatives))
       (cond
         [(= (modulo j 100) 0)
-         (printf "Sample ~a\n" j)])
+         (printf "Sample ~a: ~a\n" j (pretty-pauli P))])
 
       (define w (pauli-weight P))
-      (unless (and (exact-integer? w) (<= L w n))
-        (error 'run-logical-weight-experiment
-               "unexpected sampled weight ~a; expected between ~a and ~a"
-               w L n))
       w))
 
   (make-directory* "results")
   (define output-file
-    (format "results/toric-L~a-two-class-samples.csv" L))
+    (format "results/toric-L~a-generic.csv" L))
   (call-with-output-file output-file
     (lambda (out)
       (displayln "sample,weight" out)
