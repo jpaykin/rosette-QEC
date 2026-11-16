@@ -87,10 +87,10 @@
 
     (define num-log-errors (- width (length generators-reduced)))
 
-    (print "num-log-errors: ")
-    (println (- width (length generators-reduced)))
+    ;(print "num-log-errors: ")
+    ;(println (- width (length generators-reduced)))
 
-
+    ;; TODO: make into a while loop, not just a for loop
     (define errors (make-vector num-log-errors (pauli-id width)))
     (for ([i (in-range num-log-errors)])
       (define new-generators (append generators-reduced (vector->list errors)))

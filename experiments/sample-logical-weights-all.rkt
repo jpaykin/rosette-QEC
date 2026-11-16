@@ -17,7 +17,7 @@
 ;; 1. Toric lattice geometry ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-We want this toric lattice geometry to be consistent with the toric-code.rkt implementation. This is used to construct the logical representatives of the toric code, which are noncontractible loops on the torus. 
+;; We want this toric lattice geometry to be consistent with the toric-code.rkt implementation. This is used to construct the logical representatives of the toric code, which are noncontractible loops on the torus. 
 
 ;; Vertices have row-major indices.
 (define (torus-vertex L row col)
