@@ -15,7 +15,7 @@
 (define (sample-bool)
   (eq? 1 (random 2 RAND)))
 
-(define (sample-group generators)
+(define (sample-group generators #:allow-empty [allow-empty #t])
   (unless (wf-generators? generators)
     (raise-argument-error
       'sample-group
@@ -25,17 +25,28 @@
 
   (define width (pauli-width (first generators)))
   (define P (pauli-id width))
+  (define empty? #t)
 
   (for ([G (in-list generators)])
     (cond
-      [(sample-bool) (set! P (pauli-mult P G))]))
-  P)
+      [(sample-bool) 
+       (set! P (pauli-mult P G))
+       (set! empty? #f)
+       ]))
+  (if (and empty (not allow-empty))
+    ( ; Pick an arbitrary generator of the group
+      list-ref generators (random (length generators) RAND)
+    )
+    ; else
+    P))
 
 (define (sample-logical-error generators error-generators)
+  ; TODO: check that generators is non-empty
+  ; TODO: check that error-generators is non-empty
   (define errs (list->vector error-generators))
-  (let ([i (random (length error-generators) RAND)]
+  (let ([canonical-err (sample-group generators #:allow-empty #f)]
         [P (sample-group generators)])
-    (pauli-mult P (vector-ref errs i))))
+    (pauli-mult P canonical-err)))
 
 (define (sample-logical-error* generators)
   (sample-logical-error generators

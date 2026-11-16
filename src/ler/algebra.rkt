@@ -8,6 +8,7 @@
          syndrome-of
          wf-generators?
          pauli-mult
+         reduce-generators
          pauli-row-echelon
          print-paulis
          pauli-in-group?
@@ -87,6 +88,11 @@
   (values (for/list ([row-index (in-range pivot-count)])
             (vector-ref rows row-index))
           (reverse pivot-columns)))
+
+(define (reduce-generators G)
+  (define-values (G0 pivots) (pauli-row-echelon G (pauli-width (first G))))
+  G0
+)
 
 (define (print-paulis generators)
   (for ([P (in-list generators)])

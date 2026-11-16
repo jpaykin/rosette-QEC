@@ -222,4 +222,6 @@
                     n))
 
 (define (toric-code l)
-    (stabilizers (torus-graph l l)))
+  (reduce-generators (stabilizers (torus-graph l l)))
+)
+    

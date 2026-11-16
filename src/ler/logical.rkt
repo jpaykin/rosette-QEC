@@ -18,11 +18,11 @@
          find-decoder-logical-error-generators
          )
 
-(define (logical-error? P generators)
-  (&& (not (pauli-in-group? P generators))
+(define (logical-error? P generators #:except [seen '()])
+  (&& (not (pauli-in-group? P (append generators seen)))
       (andmap (lambda (Q) (commute? P Q)) generators)))
 
-(define (find-logical-error generators)
+(define (find-logical-error generators #:except [seen '()])
   (unless (wf-generators? generators)
     (raise-argument-error
       'find-logical-error
@@ -32,9 +32,9 @@
 
   (define width (pauli-width (first generators)))
   (define-symbolic-pauli symbolic-p width)
-  (define sol (solve (assert (logical-error? symbolic-p generators))))
+  (define sol (solve (assert (logical-error? symbolic-p generators #:except seen))))
   (if (unsat? sol)
-      (error "Could not find a logical error")
+      #f
       (begin
         (define concrete-p (evaluate symbolic-p sol))
         ;(println (pretty-pauli concrete-p))
@@ -73,36 +73,19 @@
       generators)
   )
 
-  (define width (pauli-width (first generators)))
-  ;(print "Width: ")
-  ;(println width)
-
-  ;(print "num-log-errors: ")
-  ;(println num-log-errors)
-
-  (let-values ([(generators-reduced _)
-                (pauli-row-echelon generators width)])
-    ;(print "reduced form: ")
-    ;(print-paulis generators_reduced)
-
-    (define num-log-errors (- width (length generators-reduced)))
-
-    ;(print "num-log-errors: ")
-    ;(println (- width (length generators-reduced)))
-
-    ;; TODO: make into a while loop, not just a for loop
-    (define errors (make-vector num-log-errors (pauli-id width)))
-    (for ([i (in-range num-log-errors)])
-      (define new-generators (append generators-reduced (vector->list errors)))
-      ;(println "New generators found:")
-      ;(print-paulis new-generators)
-      (define P (find-logical-error new-generators))
-      (vector-set! errors i P))
-
-    (vector->list errors)))
+  (define generators-reduced (reduce-generators generators))
+  
+  (define (loop errors)
+    (define P (find-logical-error generators-reduced #:except errors))
+    (if (eq? P #f)
+      errors
+      (loop (cons P errors))
+    ))
+  (loop '())
+)
 
 (define (bits->bv n b ..)
-  (concat (bool->bitvector b)
+  (append (bool->bitvector b)
           ..)
 )
 
@@ -132,7 +115,7 @@
   (define x2 (&& (not b0) b1))
 
   (pauli 3
-         (concat (bool->bv1 x0)
+         (append (bool->bv1 x0)
                  (bool->bv1 x1)
                  (bool->bv1 x2))
          (bv 0 3)))
@@ -183,7 +166,8 @@
       (pauli-mult
         (decoder (syndrome-of P generators))
         P)
-      (append generators except-arg))
+      generators
+      #:except except-arg)
     (not (member P except-arg))
   ))
 

@@ -2,7 +2,6 @@
 
 ;; First toric-code sampling experiment: sample from the logical-error
 ;; representatives produced by the existing implementation in logical.rkt.
-;; This is NOT a uniform sample over all 15 nontrivial logical Pauli classes.
 
 (require "../src/ler/pauli.rkt"
          "../src/ler/algebra.rkt"
@@ -30,13 +29,13 @@
   ;; representatives is a list of two nontrivial logical representatives for the toric code.
   (define representatives (find-logical-error-generators G))
   
-  ;; why two? because the toric code has two logical qubits
-  (unless (= (length representatives) 2)
+  ;; why four? because the toric code has two logical qubits
+  (unless (= (length representatives) 4)
     (error 'run-logical-weight-experiment
-           "expected 2 logical representatives for the toric code, got ~a"
+           "expected 4 logical representatives for the toric code, got ~a"
            (length representatives)))
 
-  ;; Check that both representatives really are nontrivial logical errors.
+  ;; Check that all representatives really are nontrivial logical errors.
   (for ([P (in-list representatives)] [i (in-naturals 1)])
     (unless (logical-error? P G)
       (error 'run-logical-weight-experiment
@@ -52,8 +51,12 @@
   ;; Each sample is S * P_i, where S is a random stabilizer and
   ;; P_i is one of the two logical representatives selected above.
   (define weights
-    (for/list ([_ (in-range shots)])
+    (for/list ([j (in-range shots)])
       (define P (sample-logical-error G representatives))
+      (cond
+        [(= (modulo j 100) 0)
+         (printf "Sample ~a\n" j)])
+
       (define w (pauli-weight P))
       (unless (and (exact-integer? w) (<= L w n))
         (error 'run-logical-weight-experiment
