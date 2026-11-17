@@ -16,13 +16,6 @@
   (eq? 1 (random 2 RAND)))
 
 (define (sample-group generators #:allow-empty [allow-empty #t])
-  (unless (wf-generators? generators)
-    (raise-argument-error
-      'sample-group
-      "wf-generators?"
-      generators)
-  )
-
   (define width (pauli-width (first generators)))
   (define P (pauli-id width))
   (define empty? #t)
@@ -41,8 +34,6 @@
     P))
 
 (define (sample-logical-error generators error-generators)
-  ; TODO: check that generators is non-empty
-  ; TODO: check that error-generators is non-empty
   (define errs (list->vector error-generators))
   (let ([canonical-err (sample-group error-generators #:allow-empty #f)]
         [P (sample-group generators)])

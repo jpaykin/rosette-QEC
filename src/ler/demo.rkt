@@ -44,14 +44,20 @@
   ; )
 
 
-  (define generators (toric-code 3))
+  (define generators (toric-code 4))
   ;(find-logical-error generators)
   (define error-generators (find-logical-error-generators generators))
-  ;(print-paulis error-generators)
+  (print-paulis error-generators)
 
 
-  (for ([i (in-range 100)])
-      (println (pauli->symbols (sample-logical-error generators error-generators)))
-  )
+  (printf "Number of stabilizer generators: ~a\n" (length generators))
+  (printf "Size of stabilizer group: ~a\n" (expt 2 (length generators)))
+  (printf "Number of error generators: ~a\n" (length error-generators))
+  (printf "Number of equivalence classes of logical errors: ~a\n" (- (expt 2 (length error-generators)) 1))
+  (printf "Number of logical errors: ~a\n" (* (expt 2 (length generators)) (- (expt 2 (length error-generators)) 1)))
+
+;   (for ([i (in-range 100)])
+;       (println (pauli->symbols (sample-logical-error generators error-generators)))
+;   )
 
   )

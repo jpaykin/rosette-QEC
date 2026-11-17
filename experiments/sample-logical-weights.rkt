@@ -53,12 +53,13 @@
   (define weights
     (for/list ([j (in-range shots)])
       (define P (sample-logical-error G representatives))
-      (cond
-        [(= (modulo j 100) 0)
-         (printf "Sample ~a: ~a\n" j (pretty-pauli P))])
 
-      (define w (pauli-weight P))
-      w))
+      ; For debugging:
+      ; (cond
+      ;   [(= (modulo j 100) 0)
+      ;    (printf "Sample ~a: ~a\n" j (pretty-pauli P))])
+
+      (pauli-weight P)))
 
   (make-directory* "results")
   (define output-file
