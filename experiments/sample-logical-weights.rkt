@@ -1,7 +1,9 @@
 #lang rosette
 
-;; First toric-code sampling experiment: sample from the logical-error
-;; representatives produced by the existing implementation in logical.rkt.
+;; Generic sampling experiment: given the stabilizer generators of any
+;; stabilizer code, sample logical errors S * P_i, where S is a random
+;; stabilizer and P_i is a logical-error representative found by the solver
+;; in logical.rkt.
 
 (require "../src/ler/pauli.rkt"
          "../src/ler/algebra.rkt"
@@ -12,28 +14,22 @@
 
 (provide run-logical-weight-experiment)
 
-;; parameter checks: is L a positive integer >= 3? is shots a positive integer?
-(define (run-logical-weight-experiment L shots)
-  (unless (and (exact-integer? L) (>= L 3))
-    (raise-argument-error 'run-logical-weight-experiment "exact integer >= 3" L))
+;; G: list of commuting stabilizer generators (same width).
+;; shots: positive integer.
+;; label: used in the output file name results/<label>-generic.csv.
+(define (run-logical-weight-experiment G shots #:label [label "code"])
+  (unless (wf-generators? G)
+    (raise-argument-error 'run-logical-weight-experiment "wf-generators?" G))
   (unless (and (exact-integer? shots) (positive? shots))
     (raise-argument-error 'run-logical-weight-experiment "positive exact integer" shots))
 
-;; define n as the number of physical qubits in the toric code, which is 2 * L * L
-;; define G as the toric code graph for the given L
+  (define n (pauli-width (first G)))
 
-  (define n (* 2 L L))
-  (define G (toric-code L))
-
-  ;;run the solver only once, not once per sample.
-  ;; representatives is a list of two nontrivial logical representatives for the toric code.
+  ;; Run the solver only once, not once per sample.
   (define representatives (find-logical-error-generators G))
-  
-  ;; why four? because the toric code has two logical qubits
-  (unless (= (length representatives) 4)
+  (when (null? representatives)
     (error 'run-logical-weight-experiment
-           "expected 4 logical representatives for the toric code, got ~a"
-           (length representatives)))
+           "code has no logical errors to sample"))
 
   ;; Check that all representatives really are nontrivial logical errors.
   (for ([P (in-list representatives)] [i (in-naturals 1)])
@@ -41,7 +37,7 @@
       (error 'run-logical-weight-experiment
              "representative ~a is not a nontrivial logical error" i)))
 
-  (printf "Toric code: L=~a, physical qubits=~a\n" L n)
+  (printf "Code ~a: physical qubits=~a, generators=~a\n" label n (length G))
   (printf "Sampling ~a errors using ~a logical representatives:\n"
           shots (length representatives))
   (for ([P (in-list representatives)] [i (in-naturals 1)])
@@ -63,7 +59,7 @@
 
   (make-directory* "results")
   (define output-file
-    (format "results/toric-L~a-generic.csv" L))
+    (format "results/~a-generic.csv" label))
   (call-with-output-file output-file
     (lambda (out)
       (displayln "sample,weight" out)
@@ -84,4 +80,7 @@
            "usage: racket experiments/sample-logical-weights.rkt [L SHOTS]"))
   (define L (if (null? args) 3 (string->number (first args))))
   (define shots (if (null? args) 1000 (string->number (second args))))
-  (run-logical-weight-experiment L shots))
+  (unless (and (exact-integer? L) (>= L 3))
+    (raise-argument-error 'sample-logical-weights "exact integer >= 3" L))
+  (run-logical-weight-experiment (toric-code L) shots
+                                 #:label (format "toric-L~a" L)))
