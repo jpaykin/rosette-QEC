@@ -52,11 +52,18 @@
   (unless (list? offsets)
     (raise-argument-error 'run-circuit "list of negative record offsets" offsets))
   (for/fold ([result zero]) ([offset (in-list offsets)])
-    (unless (and (concrete? offset) (exact-integer? offset)
-                 (< offset 0) (<= (- offset) (length records)))
+    (define (invalid-offset)
       (raise-arguments-error 'run-circuit "invalid measurement record offset"
                              "offset" offset "measurements so far" (length records)))
-    (combine result (list-ref records (sub1 (- offset))))))
+    (unless (and (concrete? offset) (exact-integer? offset) (< offset 0))
+      (invalid-offset))
+    (define selected
+      (let loop ([remaining records] [index (sub1 (- offset))])
+        (cond
+          [(null? remaining) (invalid-offset)]
+          [(zero? index) (car remaining)]
+          [else (loop (cdr remaining) (sub1 index))])))
+    (combine result selected)))
 
 ;; Execute the ideal reference and a fault frame in parallel. The reference
 ;; checks noiseless parity determinism; xs and zs describe the Pauli error on
