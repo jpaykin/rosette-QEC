@@ -4,7 +4,11 @@
 
 This experiment samples physical Pauli operators from all 15 nontrivial logical classes of the toric code. It records their physical weights and generates histograms showing the weight distributions.
 
-Run all commands from the root of the `rosette-QEC` repository.
+Run all commands from the root of the `qec` repository.
+The Racket experiment requires the package dependencies described in the
+[setup instructions](../README.md#setup). The plotting script also requires
+Matplotlib, which can be installed in your Python environment with
+`python3 -m pip install matplotlib`.
 
 ## Step 1 — Run the Rosette Sampling Experiment
 

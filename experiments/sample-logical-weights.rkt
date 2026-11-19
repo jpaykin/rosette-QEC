@@ -1,15 +1,12 @@
 #lang rosette
 
-;; Generic sampling experiment: given the stabilizer generators of any
-;; stabilizer code, sample logical errors S * P_i, where S is a random
-;; stabilizer and P_i is a logical-error representative found by the solver
-;; in logical.rkt.
+;; Generic sampling experiment: given the stabilizer generators of a code,
+;; sample products of a random stabilizer and a nonempty random subset of
+;; logical-error generators found by the solver in logical.rkt.
 
-(require "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/logical.rkt"
-         "../src/ler/sampling.rkt"
-         "../src/ler/examples/toric-code.rkt"
+(require "../src/paulis.rkt"
+         "../src/stabilizer-codes.rkt"
+         "../src/examples/toric-code.rkt"
          racket/file)
 
 (provide run-logical-weight-experiment)
@@ -44,8 +41,8 @@
     (printf "  Representative ~a: ~a (weight ~a)\n"
             i (pretty-pauli P) (pauli-weight P)))
 
-  ;; Each sample is S * P_i, where S is a random stabilizer and
-  ;; P_i is one of the logical representatives selected above.
+  ;; Each sample is S times the product of a nonempty random subset of
+  ;; the logical representatives, where S is a random stabilizer.
   (define weights
     (for/list ([j (in-range shots)])
       (define P (sample-logical-error G representatives))

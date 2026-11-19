@@ -2,36 +2,12 @@
 
 (require racket/string)
 
-(provide ;; data structures
-         (struct-out pauli1)
-         (struct-out pauli)
-         ;; constructors
-         define-symbolic-pauli
-         pauli-id
-         pauli1X
-         pauli1Y
-         pauli1Z
-         pauli1I
-         symbol->pauli
-         bits->pauli
-         symbol->pauli1
-         symbols->pauli
-         ;; boolean validity of Paulis
-         single-qubit-pauli?
-         wf-pauli?
-         ;; projectors
-         pauli1-at
-         pauli-weight
-         ;; pretty-printing
-         pauli1->symbol
-         pauli->symbols
-         pretty-pauli1
-         pretty-pauli
-         ;; examples
-         example1
-         example2)
+(provide (all-defined-out))
 
+; A single-qubit (unsigned) Pauli is a pair of bits X^x Z^z
 (struct pauli1 (x z) #:transparent)
+; An n-qubit Pauli (where n is referred to as the width)
+; is a pair of size-n bitvectors xs and zs
 (struct pauli (width xs zs) #:transparent)
 
 ;; Validity
@@ -151,20 +127,11 @@
      (pretty-pauli1 (pauli1-at i P)))
    ""))
 
-(define (pauli-id width)
-  (pauli width (bv 0 width) (bv 0 width)))
 
-;; changed eq? to equal?
-;; eq? checks if they are same object and equal? checks if they are structurally equal and have the same contents.
-; (define (pauli-weight P)
-;   (define weight 0)
-;   (for ([i (in-range (pauli-width P))])
-;     (cond
-;       [(not (equal? (pauli1-at i P) (symbol->pauli1 'I)))
-;        (set! weight (add1 weight))]))
-;   weight)
+; Identity Pauli for n qubits
+(define (pauli-id n)
+  (pauli n (bv 0 n) (bv 0 n)))
 
-;; the new pauli-weight directly examines the bitvectors
 (define (pauli-weight P)
   (for/sum ([i (in-range (pauli-width P))])
     (define p (pauli1-at i P))
@@ -175,5 +142,5 @@
 
 
 ;; Example use-case
-(define example1 (pauli 2 (bv #b01 2) (bv #b10 2)))
-(define example2 (symbols->pauli '(X Z)))
+; (define example1 (pauli 2 (bv #b01 2) (bv #b10 2)))
+; (define example2 (symbols->pauli '(X Z)))

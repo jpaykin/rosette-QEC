@@ -1,12 +1,10 @@
 #lang rosette
 
-(require "pauli.rkt"
-         "algebra.rkt"
-         "logical.rkt"
-         "sampling.rkt"
+(require "paulis.rkt"
+         "stabilizer-codes.rkt"
          "examples/toric-code.rkt")
 
-(provide run-demo)
+(provide (all-defined-out))
 
 (define (run-demo)
   ;(displayln (pretty-pauli1 (pauli1 #f #t)))

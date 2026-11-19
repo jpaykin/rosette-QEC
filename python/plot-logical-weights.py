@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Plot weight frequencies from the existing two-representative toric sampler."""
+"""Plot weight frequencies from the generic logical-error sampler."""
 
 import argparse
 import csv

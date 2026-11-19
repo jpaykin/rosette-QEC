@@ -1,18 +1,14 @@
 #lang rosette
 
-;; Algebraic operations on Paulis
+;; Algebraic operations on unsigned Paulis, including:
+;;    - commutativity
+;;    - Pauli multiplication
+;;    - reduce-generators - reduce a set of mutually commuting Paulis to a linearly independent set
+;;    - group membership
 
-(require "pauli.rkt")
+(require "definitions.rkt")
 
-(provide commute?
-         syndrome-of
-         wf-generators?
-         pauli-mult
-         reduce-generators
-         pauli-row-echelon
-         print-paulis
-         pauli-in-group?
-         )
+(provide (all-defined-out))
 
 (define (bv-inner-product width u v)
   (for/fold ([parity (bv 0 (bitvector 1))])
@@ -98,10 +94,6 @@
   (for ([P (in-list generators)])
     (displayln (pretty-pauli P))))
 
-;; syndrome of a Pauli P with respect to a list of generators of a Pauli group
-(define (syndrome-of P G)
-  (map (lambda (g) (not (commute? P g))) G)
-)
 
 (define (pauli-in-group? P generators)
   (unless (and (wf-pauli? P)

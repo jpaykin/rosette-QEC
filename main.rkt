@@ -1,18 +1,13 @@
-#lang rosette
+#lang racket/base
 
-(require "src/ler/pauli.rkt"
-         "src/ler/algebra.rkt"
-         "src/ler/logical.rkt"
-         "src/ler/circuit.rkt"
-         "src/ler/sampling.rkt"
-         "src/ler/demo.rkt")
+(require "src/paulis.rkt"
+         "src/stabilizer-codes.rkt"
+         "src/circuits.rkt")
 
-(provide (all-from-out "src/ler/pauli.rkt"
-                       "src/ler/algebra.rkt"
-                       "src/ler/logical.rkt"
-                       "src/ler/circuit.rkt"
-                       "src/ler/sampling.rkt"
-                       "src/ler/demo.rkt"))
+(provide (all-from-out "src/paulis.rkt"
+                       "src/stabilizer-codes.rkt"
+                       "src/circuits.rkt"))
 
 (module+ main
+  (require "src/demo.rkt")
   (displayln (run-demo)))

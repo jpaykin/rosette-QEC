@@ -1,9 +1,9 @@
 #lang rosette
 
 (require rackunit
-         "../src/ler/circuit.rkt"
-         "../src/ler/pauli.rkt"
-         "../src/ler/examples/repetition-circuit.rkt")
+         "../src/circuits/circuit.rkt"
+         "../src/paulis/definitions.rkt"
+         "../src/examples/repetition-circuit.rkt")
 
 (define paulis (list pauli1I pauli1X pauli1Y pauli1Z))
 (define (run width . instructions)

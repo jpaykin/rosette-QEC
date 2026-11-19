@@ -1,7 +1,7 @@
-# LER
+# QEC Analysis
 
-A  playground for using [Rosette](https://emina.github.io/rosette/) (Racket's solver-aided
-language) for estimating the logical error rate (LER) of a quantum error-correcting code.
+A library for analyzing properties of quantum error-correcting codes using
+symbolic executionj via [Rosette](https://emina.github.io/rosette/) (Racket's solver-aided language).
 
 ## Setup
 
@@ -9,11 +9,23 @@ language) for estimating the logical error rate (LER) of a quantum error-correct
 
     - MacOS: `brew install --cask racket`
 
-2. Install the package and its dependencies (replace the path with the cloned
-   project directory):
+2. Link this checkout as a Racket package, installing its dependencies,
+   including Rosette:
 
     ```sh
-    raco pkg install --auto --link /path/to/rosette-QEC
+    raco pkg install --auto --link --name qec /path/to/checkout
+    ```
+
+    If calling from the working directory, use:
+
+    ```sh
+    raco pkg install --auto --link --name qec "$PWD"
+    ```
+
+    To uninstll:
+    
+    ```sh
+    raco pkg remove qec
     ```
 
 ## Run the demo
@@ -22,21 +34,26 @@ language) for estimating the logical error rate (LER) of a quantum error-correct
 racket main.rkt
 ```
 
-The reusable implementation is split into modules under `src/ler/`. Requiring
-the `LER` collection makes their public operations available without running
-the demo:
+The `qec` collection exposes the public operations of all three domains without
+running the demo:
 
 ```racket
 #lang racket
-(require LER)
+(require qec)
 
 (pretty-pauli (symbols->pauli '(X Z)))
 ```
 
+For a narrower API, require `qec/src/paulis`, `qec/src/stabilizer-codes`, or
+`qec/src/circuits`.
+Examples are available separately, for example `(require qec/src/examples/toric-code)`.
+The five-qubit, tiny, repetition, and Shor code examples, along with the
+repetition-code decoder, are in `qec/src/examples/stabilizer-codes`.
+
 ## Test
 
 ```sh
-raco test tests/core.rkt tests/circuit.rkt
+raco test tests/core.rkt tests/circuit.rkt tests/interfaces.rkt
 ```
 
 ## Clifford circuits
@@ -46,7 +63,7 @@ Circuits are Racket values with zero-based qubit indices. Qubits start in
 
 ```racket
 #lang rosette
-(require LER)
+(require qec)
 
 (define-symbolic x z boolean?)
 (define result
@@ -85,7 +102,7 @@ detector parities, and nondeterministic completed observable parities. Individua
 measurements may be random when their annotated parity is deterministic.
 Symbolic intentional Pauli gates are part of the ideal reference; fault gates
 are replaced by identity in that reference. See
-`src/ler/examples/repetition-circuit.rkt` for a three-qubit example.
+`src/examples/repetition-circuit.rkt` for a three-qubit example.
 
 This is a circuit API, not a Stim parser. Noise probabilities, multi-qubit
 fault gates, sampling, solver-based fault search, feedback, gauge detectors,
@@ -94,13 +111,11 @@ and Pauli-target observables are not implemented.
 ## Project layout
 
 - `info.rkt` — package metadata and dependencies
-- `main.rkt` — public facade and demo entry point
-- `src/ler/pauli.rkt` — Pauli representation, conversion, and display
-- `src/ler/algebra.rkt` — commutation, multiplication, and generator operations
-- `src/ler/logical.rkt` — logical-error predicates and synthesis
-- `src/ler/circuit.rkt` — circuit instructions and fault-frame evaluation
-- `src/ler/circuit-reference.rkt` — ideal stabilizer reference and annotation validation
-- `src/ler/examples/repetition-circuit.rkt` — circuit-based repetition-code example
-- `src/ler/sampling.rkt` — group and logical-error sampling
-- `src/ler/demo.rkt` — demonstration routine
+- `main.rkt` — aggregate public interface and demo entry point
+- `src/paulis.rkt`, `src/stabilizer-codes.rkt`, `src/circuits.rkt` — public interfaces
+- `src/paulis/` — Pauli definitions, algebra, and group sampling
+- `src/stabilizer-codes/` — logical-error predicates, synthesis, and sampling
+- `src/circuits/` — circuit evaluation and ideal stabilizer reference
+- `src/examples/` — code and circuit examples
+- `src/demo.rkt` — demonstration routine
 - `tests/core.rkt` — focused RackUnit tests

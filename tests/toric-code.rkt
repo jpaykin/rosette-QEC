@@ -2,9 +2,8 @@
 
 (require rackunit
          rosette
-         "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/examples/toric-code.rkt")
+         "../src/paulis.rkt"
+         "../src/examples/toric-code.rkt")
 
 (define square
   (edges->graph 4 '((0 1) (1 2) (2 3) (3 0))))
@@ -156,16 +155,16 @@
                          (list-ref face (modulo (add1 i) 4)))))))
   (check-equal? (get-faces square) '((0 1 2 3))))
 
-(test-case "plaquette and face stabilizers have edge width and weight four"
-  (define plaquette (plaquette-stabilizer torus-3x3 0))
+(test-case "vertex and face stabilizers have edge width and weight four"
+  (define vertex (vertex-stabilizer torus-3x3 0))
   (define face (face-stabilizer torus-3x3 0 1 4 3))
-  (check-equal? (pauli-width plaquette) 18)
+  (check-equal? (pauli-width vertex) 18)
   (check-equal? (pauli-width face) 18)
-  (check-equal? (pauli->symbols plaquette)
+  (check-equal? (pauli->symbols vertex)
                 '(X I X I I I I I I X I I I I I X I I))
   (check-equal? (pauli->symbols face)
                 '(Z I I Z I I I I I Z Z I I I I I I I))
-  (check-equal? (length (plaquette-stabilizers torus-3x3)) 9)
+  (check-equal? (length (vertex-stabilizers torus-3x3)) 9)
   (check-equal? (length (faces-stabilizers torus-3x3)) 9)
   (check-equal? (length (stabilizers torus-3x3)) 18)
   (for ([stabilizer (in-list (stabilizers torus-3x3))])

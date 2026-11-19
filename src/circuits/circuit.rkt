@@ -1,22 +1,20 @@
 #lang rosette
 
 (require racket/match
-         "pauli.rkt"
-         "circuit-reference.rkt")
+         "../paulis/definitions.rkt"
+         (only-in "reference.rkt"
+                  make-reference
+                  reference-h!
+                  reference-s!
+                  reference-cx!
+                  reference-pauli!
+                  reference-measure!
+                  reference-reset!
+                  parity-zero
+                  parity-xor
+                  parity-random?))
 
-(provide (struct-out circuit)
-         (struct-out gate-h)
-         (struct-out gate-s)
-         (struct-out gate-cx)
-         (struct-out gate-pauli)
-         (struct-out gate-fault)
-         (struct-out measure-qubit)
-         (struct-out reset-qubit)
-         (struct-out detector)
-         (struct-out observable)
-         (struct-out circuit-result)
-         run-circuit
-         undetected-logical-error?)
+(provide (all-defined-out))
 
 (struct circuit (width instructions) #:transparent)
 (struct gate-h (qubit) #:transparent)

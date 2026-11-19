@@ -1,21 +1,12 @@
 #lang rosette
 
-(require "pauli.rkt")
+(require "../paulis/definitions.rkt")
 
 ;; This module tracks the fault-free circuit as a signed stabilizer state.
 ;; It validates that detector and observable parities are deterministic; the
 ;; separate Pauli frame in circuit.rkt computes their fault-induced flips.
 
-(provide make-reference
-         reference-h!
-         reference-s!
-         reference-cx!
-         reference-pauli!
-         reference-measure!
-         reference-reset!
-         parity-zero
-         parity-xor
-         parity-random?)
+(provide (all-defined-out))
 
 ;; An affine XOR expression: constant XOR the random bits selected by
 ;; random-mask. For example, #b101 selects r0 XOR r2. The constant may be a

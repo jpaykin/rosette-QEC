@@ -1,22 +1,14 @@
 #lang rosette
 
-(require "pauli.rkt"
-         "algebra.rkt")
+(require "../paulis/definitions.rkt"
+         "../paulis/algebra.rkt")
 
-(provide logical-error?
-         find-logical-error
-         find-logical-error-generators
-         
-         five-qubit-code
-         tiny-example-code
-         repetition-code
-         repetition-code-decoder
+(provide (all-defined-out))
 
-         define-symbolic-syndrome
-         decoder-logical-error?
-         find-decoder-logical-error
-         find-decoder-logical-error-generators
-         )
+;; syndrome of a Pauli P with respect to a list of generators of a Pauli group
+(define (syndrome-of P G)
+  (map (lambda (g) (not (commute? P g))) G)
+)
 
 (define (logical-error? P generators #:except [seen '()])
   (&& (not (pauli-in-group? P (append generators seen)))
@@ -39,31 +31,6 @@
         (define concrete-p (evaluate symbolic-p sol))
         ;(println (pretty-pauli concrete-p))
         concrete-p)))
-
-(define five-qubit-code
-  (list (symbols->pauli '(X Z Z X I))
-        (symbols->pauli '(I X Z Z X))
-        (symbols->pauli '(X I X Z Z))
-        (symbols->pauli '(Z X I X Z))))
-
-(define tiny-example-code
-  (list (symbols->pauli '(X Z Z X I))))
-
-(define repetition-code
-  (list (symbols->pauli '(Z Z I))
-        (symbols->pauli '(I Z Z))))
-
-(define shor-nine-qubit-code
-  (list
-    (symbols->pauli '(Z Z I I I I I I I))
-    (symbols->pauli '(I Z Z I I I I I I))
-    (symbols->pauli '(I I I Z Z I I I I))
-    (symbols->pauli '(I I I I Z Z I I I))
-    (symbols->pauli '(I I I I I I Z Z I))
-    (symbols->pauli '(I I I I I I I Z Z))
-    (symbols->pauli '(X X X X X X I I I))
-    (symbols->pauli '(I I I X X X X X X))))
-
 
 (define (find-logical-error-generators generators)
   (unless (wf-generators? generators)
@@ -89,54 +56,9 @@
           ..)
 )
 
-;; Takes as input a 2-bit syndrome, returns a 3-qubit Pauli
-(define (bool->bv1 b)
-  (if b (bv 1 1) (bv 0 1)))
-
-;; Need to be careful how you define this
-;; so it produces a symbolic pauli
-;; e.g. can't use symbol->pauli
-
-(define (repetition-code-decoder syndrome)
-  ( unless (and (list? syndrome) 
-                (eq? (length syndrome) 2)
-                (boolean? (first syndrome))
-                (boolean? (second syndrome)))
-      (raise-argument-error
-        'repetition-code-decoder
-        "ill-formed syndrome"
-        syndrome))
-
-  (define b0 (first syndrome))
-  (define b1 (second syndrome))
-
-  (define x0 (&& b0 (not b1)))
-  (define x1 (&& b0 b1))
-  (define x2 (&& (not b0) b1))
-
-  (pauli 3
-         (append (bool->bv1 x0)
-                 (bool->bv1 x1)
-                 (bool->bv1 x2))
-         (bv 0 3)))
-
-
-
-  ; (let* ([b0 (first syndrome)]
-  ;        [b1 (second syndrome)])
-  ; (cond 
-  ;   [(and (not b0) (not b1)) => (symbols->pauli '(I I I))]
-  ;   [(and (    b0) (not b1)) => (symbols->pauli '(X I I))]
-  ;   [(and (not b0) (    b1)) => (symbols->pauli '(I I X))]
-  ;   [(and (    b0) (    b1)) => (symbols->pauli '(I X I))]
-  ; )))
-
-;; A decoder is well-formed with respect to an r-length
-;; generator list of n-qubit Paulis
-;; if it takes in a r-bit syndrome and returns a Pauli of size (n-r)
-;;
-;; it should also satisfy the property that,
-;; for all inputs ,....
+;; A decoder for r generators on n qubits should map an r-bit syndrome to
+;; an n-qubit Pauli with that syndrome. This placeholder only delegates to
+;; wf-generators?; it does not check the decoder.
 (define (wf-decoder? dec generators)
   (define width (pauli-width (first generators)))
   (wf-generators? generators)
