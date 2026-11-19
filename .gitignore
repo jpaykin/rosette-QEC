@@ -1,3 +1,6 @@
 compiled/
 results/
 .vscode
+.agents/
+AGENTS.md
+skills-lock.json
