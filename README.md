@@ -13,7 +13,7 @@ symbolic executionj via [Rosette](https://emina.github.io/rosette/) (Racket's so
    including Rosette:
 
     ```sh
-    raco pkg install --auto --link /path/to/checkout
+    raco pkg install --auto --link --name qec /path/to/checkout
     ```
 
     If calling from the working directory, use:
