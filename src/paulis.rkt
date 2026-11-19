@@ -9,6 +9,7 @@
          
          ;; constructors
          define-symbolic-pauli
+         define-symbolic-pauli1
          pauli-id
          pauli1X
          pauli1Y

@@ -19,7 +19,32 @@
          (detector '(-2 -1))
          (observable 0 '(-3)))))
 
+  
+
 (module+ main
   (define result (run-circuit (repetition-circuit pauli1X pauli1X pauli1X)))
   (displayln result)
-  (displayln (undetected-logical-error? result)))
+  (displayln (undetected-logical-error? result))
+  
+  ; Note: is it better to have the symbolic error as 3 single-qubit Paulis,
+  ; or to have it as a 3-qubit Pauli, to take advantage of the bitvector representation?
+  (define-symbolic-pauli1 err1)
+  (define-symbolic-pauli1 err2)
+  (define-symbolic-pauli1 err3)
+  (define symb-result (run-circuit (repetition-circuit err1 err2 err3)))
+  (define sol (solve (assert (undetected-logical-error? symb-result))))
+  (if (unsat? sol)
+      (printf "No logical error found\n")
+      (begin
+        (printf "Logical error found:\n")
+        (define complete-sol (complete-solution sol (symbolics (list err1 err2 err3))))
+        (define concrete-err1 (evaluate err1 complete-sol))
+        (define concrete-err2 (evaluate err2 complete-sol))
+        (define concrete-err3 (evaluate err3 complete-sol))
+        (printf "~a; ~a; ~a\n"
+          (pretty-pauli1 concrete-err1)
+          (pretty-pauli1 concrete-err2)
+          (pretty-pauli1 concrete-err3)
+          )
+      )
+  ))
