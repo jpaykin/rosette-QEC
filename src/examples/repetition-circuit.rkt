@@ -24,7 +24,7 @@
 (module+ main
   ;(define result (run-circuit (repetition-circuit pauli1X pauli1X pauli1X)))
   ;(displayln result)
-  ;(displayln (undetected-logical-error? result))
+  ;(displayln (undetected-logical-error-result? result))
   
   ; Note: is it better to have the symbolic error as 3 single-qubit Paulis,
   ; or to have it as a 3-qubit Pauli, to take advantage of the bitvector representation?

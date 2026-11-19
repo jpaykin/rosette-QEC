@@ -15,7 +15,10 @@
          (struct-out observable)
          (struct-out circuit-result)
          run-circuit
-         undetected-logical-error?
+         undetected-logical-error-result?
+         circuit-stabilizer-result?
+         undetected-logical-circuit-error?
+         circuit-stabilizer?
          find-circuit-logical-error
          find-circuit-error-generators
          )

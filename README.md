@@ -75,9 +75,10 @@ Circuits are Racket values with zero-based qubit indices. Qubits start in
                   (detector '(-1))
                   (observable 0 '(-1))))))
 
-(circuit-result-detectors result)       ; (list x)
-(circuit-result-observables result)     ; (list x)
-(undetected-logical-error? result)     ; false: the detector also flips
+(circuit-result-detectors result)            ; (list x)
+(circuit-result-observables result)          ; (list x)
+(undetected-logical-error-result? result)    ; #f: the detector also flips
+(circuit-stabilizer-result? result)          ; true exactly when x is false
 ```
 
 `gate-h`, `gate-s`, and `gate-cx` apply H, S, and controlled-X; CX takes
@@ -94,8 +95,25 @@ offsets into the specified nonnegative ID, including across multiple
 annotations. Repeated offsets cancel. Results contain detector flips in
 instruction order and observable flips in ID order, with gaps represented by
 `#f`. Flips are relative to the fault-free circuit, not raw measurement
-values. An undetected logical error has no detector flips and at least one
-observable flip.
+values. `undetected-logical-error-result?` is true when no detector flips and
+at least one observable flips. `circuit-stabilizer-result?` is true when
+neither detectors nor observables flip, relative to the circuit's specified
+annotations; empty detector and observable lists satisfy this condition. Both
+predicates accept symbolic results.
+
+For a circuit constructor that accepts a Pauli fault, the corresponding
+predicates take the fault and constructor directly:
+
+```racket
+(require qec/src/examples/repetition-circuit)
+
+(undetected-logical-circuit-error? (symbols->pauli '(X X X)) repetition-circuit) ; #t
+(circuit-stabilizer? (symbols->pauli '(Z Z I)) repetition-circuit)               ; #t
+```
+
+These call the constructor with the fault, run the resulting circuit, and
+classify its result. For this example the constructor accepts a three-qubit
+Pauli, with one fault per data qubit.
 
 `run-circuit` rejects invalid instructions or references, nondeterministic
 detector parities, and nondeterministic completed observable parities. Individual
@@ -105,8 +123,8 @@ are replaced by identity in that reference. See
 `src/examples/repetition-circuit.rkt` for a three-qubit example.
 
 This is a circuit API, not a Stim parser. Noise probabilities, multi-qubit
-fault gates, sampling, solver-based fault search, feedback, gauge detectors,
-and Pauli-target observables are not implemented.
+fault gates, sampling, feedback, gauge detectors, and Pauli-target observables
+are not implemented.
 
 ## Project layout
 
