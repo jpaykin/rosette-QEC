@@ -1,9 +1,9 @@
 #lang rosette
 
-(require "../circuit.rkt"
-         "../pauli.rkt")
+(require "../circuits.rkt"
+         "../paulis.rkt")
 
-(provide repetition-circuit)
+(provide (all-defined-out))
 
 ;; The three values specify faults on the three data qubits. If their X
 ;; components are x0, x1, and x2, the detector flips are x0 XOR x1 and

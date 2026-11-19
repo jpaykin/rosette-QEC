@@ -1,8 +1,8 @@
 #lang racket/base
 
 (require rackunit
-         "../src/ler/algebra.rkt"
-         "../src/ler/pauli.rkt")
+         "../src/paulis/algebra.rkt"
+         "../src/paulis/definitions.rkt")
 
 (test-case "syndrome-of marks generators that anticommute"
   (define generators

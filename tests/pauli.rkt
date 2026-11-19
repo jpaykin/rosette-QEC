@@ -2,7 +2,7 @@
 
 (require rackunit
          rosette
-         "../src/ler/pauli.rkt")
+         "../src/paulis/definitions.rkt")
 
 (test-case "Pauli symbol conversion round-trips"
   (define symbols '(I X Z Y))

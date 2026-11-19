@@ -1,8 +1,7 @@
 
 #lang rosette
 
-(require "pauli.rkt"
-         "algebra.rkt")
+(require "../paulis.rkt")
 
 (provide surface-code)
 

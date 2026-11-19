@@ -1,22 +1,9 @@
 #lang rosette
 
-(require "pauli.rkt"
-         "algebra.rkt")
+(require "../paulis/definitions.rkt"
+         "../paulis/algebra.rkt")
 
-(provide logical-error?
-         find-logical-error
-         find-logical-error-generators
-         
-         five-qubit-code
-         tiny-example-code
-         repetition-code
-         repetition-code-decoder
-
-         define-symbolic-syndrome
-         decoder-logical-error?
-         find-decoder-logical-error
-         find-decoder-logical-error-generators
-         )
+(provide (all-defined-out))
 
 (define (logical-error? P generators #:except [seen '()])
   (&& (not (pauli-in-group? P (append generators seen)))

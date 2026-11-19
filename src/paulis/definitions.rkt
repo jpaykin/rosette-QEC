@@ -2,34 +2,7 @@
 
 (require racket/string)
 
-(provide ;; data structures
-         (struct-out pauli1)
-         (struct-out pauli)
-         ;; constructors
-         define-symbolic-pauli
-         pauli-id
-         pauli1X
-         pauli1Y
-         pauli1Z
-         pauli1I
-         symbol->pauli
-         bits->pauli
-         symbol->pauli1
-         symbols->pauli
-         ;; boolean validity of Paulis
-         single-qubit-pauli?
-         wf-pauli?
-         ;; projectors
-         pauli1-at
-         pauli-weight
-         ;; pretty-printing
-         pauli1->symbol
-         pauli->symbols
-         pretty-pauli1
-         pretty-pauli
-         ;; examples
-         example1
-         example2)
+(provide (all-defined-out))
 
 (struct pauli1 (x z) #:transparent)
 (struct pauli (width xs zs) #:transparent)

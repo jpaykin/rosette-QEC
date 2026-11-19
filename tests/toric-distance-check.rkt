@@ -1,10 +1,9 @@
 
 #lang rosette
 
-(require "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/logical.rkt"
-         "../src/ler/examples/toric-code.rkt")
+(require "../src/paulis.rkt"
+         "../src/stabilizer-codes.rkt"
+         "../src/examples/toric-code.rkt")
 
 (provide verify-toric-distance)
 

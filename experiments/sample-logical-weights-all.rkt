@@ -5,10 +5,10 @@
 ;; of an L x L toric code.
 ;; Paulis are represented modulo global phase.
 
-(require "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/sampling.rkt"
-         "../src/ler/examples/toric-code.rkt"
+(require "../src/paulis.rkt"
+         "../src/stabilizer-codes.rkt"
+         (only-in "../src/paulis/sampling.rkt" sample-bool)
+         "../src/examples/toric-code.rkt"
          racket/file)
 
 (provide run-logical-weight-experiment)

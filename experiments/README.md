@@ -4,7 +4,7 @@
 
 This experiment samples physical Pauli operators from all 15 nontrivial logical classes of the toric code. It records their physical weights and generates histograms showing the weight distributions.
 
-Run all commands from the root of the `rosette-QEC` repository.
+Run all commands from the root of the `qec` repository.
 
 ## Step 1 — Run the Rosette Sampling Experiment
 

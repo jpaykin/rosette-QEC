@@ -1,23 +1,8 @@
 #lang rosette
 
-(require "../pauli.rkt"
-         "../algebra.rkt")
+(require "../paulis.rkt")
 
-(provide (struct-out graph)
-         edge-index
-         edge->pauli
-         vertex-stabilizer
-         vertex-stabilizers
-         get-faces
-         face-stabilizer
-         faces-stabilizers
-         stabilizers
-         valid-edge?
-         wf-edges?
-         wf-graph?
-         edges->graph
-         torus-graph
-         toric-code)
+(provide (all-defined-out))
 
 ;; The toric code starts as a graph
 ;;      num-vertices : int

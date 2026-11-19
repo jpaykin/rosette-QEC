@@ -2,17 +2,9 @@
 
 ;; Algebraic operations on Paulis
 
-(require "pauli.rkt")
+(require "definitions.rkt")
 
-(provide commute?
-         syndrome-of
-         wf-generators?
-         pauli-mult
-         reduce-generators
-         pauli-row-echelon
-         print-paulis
-         pauli-in-group?
-         )
+(provide (all-defined-out))
 
 (define (bv-inner-product width u v)
   (for/fold ([parity (bv 0 (bitvector 1))])

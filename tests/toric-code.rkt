@@ -2,9 +2,8 @@
 
 (require rackunit
          rosette
-         "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/examples/toric-code.rkt")
+         "../src/paulis.rkt"
+         "../src/examples/toric-code.rkt")
 
 (define square
   (edges->graph 4 '((0 1) (1 2) (2 3) (3 0))))

@@ -5,11 +5,9 @@
 ;; stabilizer and P_i is a logical-error representative found by the solver
 ;; in logical.rkt.
 
-(require "../src/ler/pauli.rkt"
-         "../src/ler/algebra.rkt"
-         "../src/ler/logical.rkt"
-         "../src/ler/sampling.rkt"
-         "../src/ler/examples/toric-code.rkt"
+(require "../src/paulis.rkt"
+         "../src/stabilizer-codes.rkt"
+         "../src/examples/toric-code.rkt"
          racket/file)
 
 (provide run-logical-weight-experiment)
