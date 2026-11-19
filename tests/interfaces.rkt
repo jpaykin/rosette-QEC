@@ -6,6 +6,7 @@
          "../src/paulis.rkt"
          "../src/stabilizer-codes.rkt"
          "../src/circuits.rkt"
+         "../src/examples/stabilizer-codes.rkt"
          "../main.rkt"
          (only-in "../src/paulis/definitions.rkt" bool-at)
          (only-in "../src/paulis/algebra.rkt" bv-inner-product)
@@ -17,6 +18,7 @@
 (define-runtime-path paulis-path "../src/paulis.rkt")
 (define-runtime-path stabilizer-codes-path "../src/stabilizer-codes.rkt")
 (define-runtime-path circuits-path "../src/circuits.rkt")
+(define-runtime-path logical-path "../src/stabilizer-codes/logical.rkt")
 (define-runtime-path main-path "../main.rkt")
 
 (test-case "domain and aggregate interfaces share usable bindings"
@@ -50,3 +52,28 @@
                      (cons main-path 'run-demo))])
     (check-exn exn:fail?
                (lambda () (dynamic-require (car entry) (cdr entry))))))
+
+(test-case "stabilizer examples are available separately"
+  (check-equal? (map length (list five-qubit-code tiny-example-code
+                                  repetition-code shor-nine-qubit-code))
+                '(4 1 2 8))
+  (check-equal? (map pauli->symbols repetition-code) '((Z Z I) (I Z Z)))
+  (check-true (procedure? repetition-code-decoder))
+  (check-exn exn:fail:contract? (lambda () (repetition-code-decoder '(#t))))
+  (for ([name '(five-qubit-code tiny-example-code repetition-code shor-nine-qubit-code
+                repetition-code-decoder bool->bv1)])
+    (check-exn exn:fail? (lambda () (dynamic-require logical-path name)))))
+
+; TODO: move this to a stabilizer-codes test file
+(test-case "repetition decoder"
+  (for ([syndrome '((#f #f) ( #t #f) (#t #t) (#f #t))]
+        [expected '((I I I) (X I I) (I X I) (I I X))])
+    (check-equal? (pauli->symbols (repetition-code-decoder syndrome))
+                  expected))
+
+  (define-symbolic b0 b1 boolean?)
+  (check-true
+   (unsat? (verify
+            (assert (equal? (syndrome-of (repetition-code-decoder (list b0 b1))
+                                         repetition-code)
+                            (list b0 b1)))))))

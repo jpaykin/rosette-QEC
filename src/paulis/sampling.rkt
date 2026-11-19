@@ -3,6 +3,8 @@
 (require "definitions.rkt"
          "algebra.rkt")
 
+;; Define sampling operations from groups of Pauli operators
+
 (provide (all-defined-out))
 
 (define RAND (make-pseudo-random-generator))

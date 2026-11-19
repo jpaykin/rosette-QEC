@@ -28,6 +28,8 @@ running the demo:
 For a narrower API, require `qec/src/paulis`, `qec/src/stabilizer-codes`, or
 `qec/src/circuits`.
 Examples are available separately, for example `(require qec/src/examples/toric-code)`.
+The five-qubit, tiny, repetition, and Shor code examples, along with the
+repetition-code decoder, are in `qec/src/examples/stabilizer-codes`.
 
 ## Test
 

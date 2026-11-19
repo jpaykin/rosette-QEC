@@ -6,6 +6,8 @@
 
 (provide (struct-out pauli1)
          (struct-out pauli)
+         
+         ;; constructors
          define-symbolic-pauli
          pauli-id
          pauli1X
@@ -16,20 +18,27 @@
          bits->pauli
          symbol->pauli1
          symbols->pauli
+
+         ;; well-formedness
          single-qubit-pauli?
          wf-pauli?
+         wf-generators?
+
+         ;; operators
          pauli1-at
          pauli-weight
+         commute?
+         pauli-mult
+
+         ;; pretty-printers
          pauli1->symbol
          pauli->symbols
          pretty-pauli1
          pretty-pauli
-         commute?
-         syndrome-of
-         wf-generators?
-         pauli-mult
-         reduce-generators
-         pauli-row-echelon
          print-paulis
+
+         ;; group operators
          pauli-in-group?
-         sample-group)
+         reduce-generators
+         sample-group
+         )
