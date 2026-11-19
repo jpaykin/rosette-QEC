@@ -56,12 +56,9 @@
           ..)
 )
 
-;; A decoder is well-formed with respect to an r-length
-;; generator list of n-qubit Paulis
-;; if it takes in a r-bit syndrome and returns a Pauli of size (n-r)
-;;
-;; it should also satisfy the property that,
-;; for all inputs ,....
+;; A decoder for r generators on n qubits should map an r-bit syndrome to
+;; an n-qubit Pauli with that syndrome. This placeholder only delegates to
+;; wf-generators?; it does not check the decoder.
 (define (wf-decoder? dec generators)
   (define width (pauli-width (first generators)))
   (wf-generators? generators)

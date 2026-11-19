@@ -9,6 +9,19 @@ symbolic executionj via [Rosette](https://emina.github.io/rosette/) (Racket's so
 
     - MacOS: `brew install --cask racket`
 
+2. Link this checkout as a Racket package, installing its dependencies,
+   including Rosette:
+
+    ```sh
+    raco pkg install --auto --link /path/to/checkout
+    ```
+
+    If calling from the working directory, use:
+
+    ```sh
+    raco pkg install --auto --link --name qec "$PWD"
+    ```
+
 ## Run the demo
 
 ```sh

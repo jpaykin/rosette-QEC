@@ -32,10 +32,10 @@
      'verify-toric-distance "exact integer >= 3" L))
 
   ;; Generate the toric code.
-  ;; The toric code has 2L^2 stabilizer generators and 2L^2 physical qubits.
+  ;; The toric code has 2L^2 physical qubits. Its 2L^2 vertex and face
+  ;; stabilizers have two dependencies.
   (define n (* 2 L L))
-  ;; G is a list of stabilizer generators for the toric code.
-  ;;toric-code generates the stabilizer generators for the toric code of size L.
+  ;; toric-code returns a reduced list of independent generators.
   (define G (toric-code L))
 
   (printf "Checking L=~a toric code\n" L)
@@ -43,7 +43,7 @@
   (printf "Stabilizer generators: ~a\n" (length G))
 
   ;; Verify that the number of stabilizer generators is correct.
-  (unless (= (length G) (* 2 L L))
+  (unless (= (length G) (- (* 2 L L) 2))
     (error 'verify-toric-distance
            "unexpected number of stabilizer generators"))
 
@@ -95,19 +95,19 @@
             "UNKNOWN: Solver could not decide")]))
 
 ;; Run from the command line.
-;; Example: racket distance-check.rkt 4
+;; From the project root: racket tests/toric-distance-check.rkt 4
 (module+ main
   (define args
     (vector->list (current-command-line-arguments)))
 
   (unless (= (length args) 1)
     (error 'distance-check
-           "usage: racket distance-check.rkt <L>"))
+           "usage: racket tests/toric-distance-check.rkt <L>"))
 
   (verify-toric-distance
    (string->number (first args))))
 
-;; Run with: raco test distance-check.rkt
+;; From the project root: raco test tests/toric-distance-check.rkt
 (module+ test
   (require rackunit)
   (check-true (verify-toric-distance 3)))
