@@ -1,7 +1,6 @@
 #lang rosette
 
-(require "../paulis/definitions.rkt"
-         "../paulis/algebra.rkt")
+(require "../paulis.rkt")
 
 (provide (all-defined-out))
 
@@ -23,14 +22,9 @@
   )
 
   (define width (pauli-width (first generators)))
-  (define-symbolic-pauli symbolic-p width)
-  (define sol (solve (assert (logical-error? symbolic-p generators #:except seen))))
-  (if (unsat? sol)
-      #f
-      (begin
-        (define concrete-p (evaluate symbolic-p sol))
-        ;(println (pretty-pauli concrete-p))
-        concrete-p)))
+  (define (prop P) (logical-error? P generators))
+  (synthesize-pauli width prop #:except seen)
+  )
 
 (define (find-logical-error-generators generators)
   (unless (wf-generators? generators)
@@ -41,14 +35,9 @@
   )
 
   (define generators-reduced (reduce-generators generators))
-  
-  (define (loop errors)
-    (define P (find-logical-error generators-reduced #:except errors))
-    (if (eq? P #f)
-      errors
-      (loop (cons P errors))
-    ))
-  (loop '())
+  (define width (pauli-width (first generators)))
+  (define (prop P) (logical-error? P generators))
+  (synthesize-generators width prop)
 )
 
 (define (bits->bv n b ..)
@@ -82,7 +71,7 @@
     bit))
 
 
-(define (decoder-logical-error? P decoder generators except-arg)
+(define (decoder-logical-error? P decoder generators #:except [except-arg '()])
   (and
     (logical-error?
       (pauli-mult
@@ -93,7 +82,7 @@
     (not (member P except-arg))
   ))
 
-(define (find-decoder-logical-error decoder generators except-arg)
+(define (find-decoder-logical-error decoder generators #:exept [except-arg '()])
   (unless (wf-decoder? decoder generators)
     (raise-argument-error
       'find-decoder-logical-error
@@ -108,14 +97,11 @@
       generators
       except-arg))
 
+  
   (define width (pauli-width (first generators)))
-  (define-symbolic-pauli symbolic-p width)
-
-  (define sol (solve (assert (decoder-logical-error? symbolic-p decoder generators except-arg))))
-  (if (unsat? sol)
-      #f
-      (evaluate symbolic-p sol)
-  ))
+  (define (prop P) (decoder-logical-error? P decoder generators #:except except-arg))
+  (synthesize-pauli width prop #:except except-arg)
+)
 
 (define (find-decoder-logical-error-generators decoder generators)
   (unless (wf-decoder? decoder generators)
@@ -123,14 +109,7 @@
     "wf-decoder?"
     decoder)
     )
-
   (define width (pauli-width (first generators)))
- 
-  (define (loop errors)
-    (define P (find-decoder-logical-error decoder generators errors))
-    (if (eq? P #f)
-      errors
-      (loop (cons P errors))
-    ))
-  (loop '())
+  (define (prop P) (decoder-logical-error? P decoder generators))
+  (synthesize-generators width prop)
 )

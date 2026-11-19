@@ -45,8 +45,8 @@
     [(_ name n)
      (with-syntax ([(xs zs) (generate-temporaries #'(name name))])
        #'(begin
-           (define-symbolic xs (bitvector n))
-           (define-symbolic zs (bitvector n))
+           (define-symbolic* xs (bitvector n))
+           (define-symbolic* zs (bitvector n))
            (define name (pauli n xs zs))))]))
 
 (define (bits->pauli n i bx bz)

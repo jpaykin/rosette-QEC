@@ -99,8 +99,6 @@
   (unless (and (wf-pauli? P)
                (exact-positive-integer? (pauli-width P)))
     (raise-argument-error 'pauli-in-group? "wf-pauli? with positive width" P))
-  (unless (and (list? generators) (pair? generators))
-    (raise-argument-error 'pauli-in-group? "non-empty list?" generators))
   (for ([generator (in-list generators)])
     (unless (and (eq? (pauli-width generator) (pauli-width P))
                  (concrete? (pauli-xs generator))
@@ -109,7 +107,7 @@
        'pauli-in-group?
        "list of concrete well-formed Paulis with matching width"
        generators)))
-  (unless (wf-generators? generators)
+  (unless (or (null? generators) (wf-generators? generators))
     (raise-argument-error 'pauli-in-group? "wf-generators?" generators))
 
   (let-values ([(basis pivots)
