@@ -22,6 +22,12 @@ symbolic executionj via [Rosette](https://emina.github.io/rosette/) (Racket's so
     raco pkg install --auto --link --name qec "$PWD"
     ```
 
+    To uninstll:
+    
+    ```sh
+    raco pkg remove qec
+    ```
+
 ## Run the demo
 
 ```sh

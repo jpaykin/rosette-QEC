@@ -3,7 +3,7 @@
 
 (require "../paulis.rkt")
 
-(provide surface-code)
+;(provide surface-code)
 
 ;; The surface code acts on a dxd grid,
 ;; with boundaries
