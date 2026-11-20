@@ -2,7 +2,9 @@
 
 (require rackunit
          "../src/circuits/circuit.rkt"
+         "../src/circuits/synthesis.rkt"
          "../src/paulis/definitions.rkt"
+         "../src/paulis/algebra.rkt"
          "../src/examples/repetition-circuit.rkt")
 
 (define paulis (list pauli1I pauli1X pauli1Y pauli1Z))
@@ -37,6 +39,30 @@
     (check-equal? (evaluate result solution) concrete)
     (check-equal? (evaluate (undetected-logical-error-result? result) solution)
                   (undetected-logical-error-result? concrete))))
+
+(test-case "circuit synthesis finds a concrete undetected repetition-code fault"
+  (define fault (find-circuit-logical-error 3 repetition-circuit))
+  (check-true (concrete? (pauli-xs fault)))
+  (check-true (concrete? (pauli-zs fault)))
+  (check-true
+   (undetected-logical-error-result?
+    (run-circuit (repetition-circuit fault)))))
+
+(test-case "circuit synthesis returns linearly independent generators"
+  (define generators (find-circuit-error-generators 3 repetition-circuit))
+  (check-true (pair? generators))
+  (check-true
+   (andmap (lambda (fault)
+             (and (concrete? (pauli-xs fault))
+                  (concrete? (pauli-zs fault))))
+           generators))
+  (check-equal? (length (reduce-generators generators))
+                (length generators)))
+
+(test-case "circuit synthesis finds no logical errors in an inert circuit"
+  (define (inert-circuit _fault) (circuit 3 '()))
+  (check-false (find-circuit-logical-error 3 inert-circuit))
+  (check-equal? (find-circuit-error-generators 3 inert-circuit) '()))
 
 (test-case "stabilizer results have no detector or observable flips"
   (check-true (circuit-stabilizer-result? (circuit-result '() '())))
