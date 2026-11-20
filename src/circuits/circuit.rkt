@@ -170,10 +170,30 @@
                     (hash-ref fault-observables index #f))))
 
 ;; An undetected logical error flips at least one observable and no detectors.
-(define (undetected-logical-error? result)
+(define (undetected-logical-error-result? result)
   (unless (circuit-result? result)
-    (raise-argument-error 'undetected-logical-error? "circuit-result?" result))
+    (raise-argument-error 'undetected-logical-error-result? "circuit-result?" result))
   (and (for/fold ([none #t]) ([d (in-list (circuit-result-detectors result))])
          (and none (not d)))
        (for/fold ([any #f]) ([o (in-list (circuit-result-observables result))])
          (or any o))))
+
+; Let circ be a circuit parameterized by a Pauli P
+(define (undetected-logical-circuit-error? P circ)
+  (undetected-logical-error-result? (run-circuit (circ P)))
+)
+
+;; A stabilizer flips neither detectors nor observables.
+(define (circuit-stabilizer-result? result)
+  (unless (circuit-result? result)
+    (raise-argument-error 'stabilizer-result? "circuit-result?" result))
+  (and (for/fold ([none #t]) ([d (in-list (circuit-result-detectors result))])
+         (and none (not d)))
+       (for/fold ([none #t]) ([o (in-list (circuit-result-observables result))])
+         (and none (not o)))))
+
+
+; Let circ be a circuit parameterized by a Pauli P
+(define (circuit-stabilizer? P circ)
+  (circuit-stabilizer-result? (run-circuit (circ P)))
+)

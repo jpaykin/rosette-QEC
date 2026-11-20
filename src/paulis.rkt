@@ -2,13 +2,15 @@
 
 (require "paulis/definitions.rkt"
          "paulis/algebra.rkt"
-         "paulis/sampling.rkt")
+         "paulis/sampling.rkt"
+         "paulis/synthesis.rkt")
 
 (provide (struct-out pauli1)
          (struct-out pauli)
          
          ;; constructors
          define-symbolic-pauli
+         define-symbolic-pauli1
          pauli-id
          pauli1X
          pauli1Y
@@ -41,4 +43,10 @@
          pauli-in-group?
          reduce-generators
          sample-group
+
+         ;; Pauli synthesis that satisfies a given property
+         synthesize-pauli
+         ;; Synthesize a set of linearly independent Paulis
+         ;; that satisfy a given property
+         synthesize-generators
          )

@@ -1,0 +1,55 @@
+#lang rosette
+
+(require "definitions.rkt"
+         "algebra.rkt")
+
+(provide (all-defined-out))
+
+
+;; Check the callable signature; the caller must ensure the result is Boolean.
+;; A property accepts #:except as either a required or optional keyword.
+(define (pauli-property? f)
+  (and (procedure? f)
+       (procedure-arity-includes? f 1 '(#:except))
+       (let-values ([(required-keywords allowed-keywords)
+                     (procedure-keywords f)])
+         (and (andmap (lambda (keyword) (eq? keyword '#:except))
+                      required-keywords)
+              (or (and (memq '#:except required-keywords) #t)
+                  (not allowed-keywords)
+                  (and (memq '#:except allowed-keywords) #t))))))
+
+; prop is a function that takes a (symbolic) Pauli of size n
+; and produces a formula that describes a property over
+; the Pauli
+; The function synthesize-pauli returns a Pauli that satisfies
+; the property if one exists; otherwise, it returns #f
+;
+; If the argument `except` is provided, pass it to the property as an argument
+(define (synthesize-pauli n prop #:except [grp '()])
+    (define-symbolic-pauli P n)
+    (define sol (solve (assert (prop P #:except grp))))
+    (if (unsat? sol)
+        #f
+        (begin
+            (define complete-sol (complete-solution sol (symbolics P)))
+            (define concrete-P (evaluate P complete-sol))
+            concrete-P
+        ))
+)
+
+(define (synthesize-generators n prop)
+    (unless (pauli-property? prop)
+        (raise-argument-error 'synthesize-generators
+            "pauli-property?"
+            prop))
+
+    (define (loop generators)
+        (define P (synthesize-pauli n prop #:except generators))
+        (if (eq? P #f)
+            generators
+            (loop (cons P generators))
+        )
+    )
+    (loop '())
+)

@@ -33,7 +33,8 @@
   (check-not-false (member (pauli->symbols (sample-logical-error (list zz) (list xx)))
                            '((X X) (Y Y))))
   (define result (run-circuit (circuit 1 (list (measure-qubit 0 'Z)))))
-  (check-equal? (circuit-result-detectors result) '()))
+  (check-equal? (circuit-result-detectors result) '())
+  (check-true (circuit-stabilizer-result? result)))
 
 (test-case "implementation helpers remain accessible but not public"
   (check-true (procedure? bool-at))

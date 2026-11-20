@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require "circuits/circuit.rkt")
+(require "circuits/synthesis.rkt")
 
 (provide (struct-out circuit)
          (struct-out gate-h)
@@ -14,4 +15,10 @@
          (struct-out observable)
          (struct-out circuit-result)
          run-circuit
-         undetected-logical-error?)
+         undetected-logical-error-result?
+         circuit-stabilizer-result?
+         undetected-logical-circuit-error?
+         circuit-stabilizer?
+         find-circuit-logical-error
+         find-circuit-error-generators
+         )

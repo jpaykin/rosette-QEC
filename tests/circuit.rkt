@@ -2,40 +2,90 @@
 
 (require rackunit
          "../src/circuits/circuit.rkt"
+         "../src/circuits/synthesis.rkt"
          "../src/paulis/definitions.rkt"
+         "../src/paulis/algebra.rkt"
          "../src/examples/repetition-circuit.rkt")
 
 (define paulis (list pauli1I pauli1X pauli1Y pauli1Z))
 (define (run width . instructions)
   (run-circuit (circuit width instructions)))
 (define (xor a b) (not (equal? a b)))
+(define (fault-pauli p0 p1 p2)
+  (symbols->pauli (map pauli1->symbol (list p2 p1 p0))))
 
 (test-case "exhaustive repetition-code faults"
   (define logical-count 0)
   (for* ([p0 (in-list paulis)] [p1 (in-list paulis)] [p2 (in-list paulis)])
-    (define result (run-circuit (repetition-circuit p0 p1 p2)))
+    (define result (run-circuit (repetition-circuit (fault-pauli p0 p1 p2))))
     (define x0 (pauli1-x p0))
     (define x1 (pauli1-x p1))
     (define x2 (pauli1-x p2))
     (check-equal? (circuit-result-detectors result) (list (xor x0 x1) (xor x1 x2)))
     (check-equal? (circuit-result-observables result) (list x0))
-    (when (undetected-logical-error? result)
+    (when (undetected-logical-error-result? result)
       (set! logical-count (add1 logical-count))))
   (check-equal? logical-count 8))
 
 (test-case "symbolic faults agree with all concrete assignments"
-  (define-symbolic x0 z0 x1 z1 x2 z2 boolean?)
+  (define-symbolic xs zs (bitvector 3))
   (define result
-    (run-circuit (repetition-circuit (pauli1 x0 z0) (pauli1 x1 z1) (pauli1 x2 z2))))
+    (run-circuit (repetition-circuit (pauli 3 xs zs))))
   (for* ([p0 (in-list paulis)] [p1 (in-list paulis)] [p2 (in-list paulis)])
+    (define fault (fault-pauli p0 p1 p2))
     (define solution
-      (sat (hash x0 (pauli1-x p0) z0 (pauli1-z p0)
-                 x1 (pauli1-x p1) z1 (pauli1-z p1)
-                 x2 (pauli1-x p2) z2 (pauli1-z p2))))
-    (define concrete (run-circuit (repetition-circuit p0 p1 p2)))
+      (sat (hash xs (pauli-xs fault) zs (pauli-zs fault))))
+    (define concrete (run-circuit (repetition-circuit fault)))
     (check-equal? (evaluate result solution) concrete)
-    (check-equal? (evaluate (undetected-logical-error? result) solution)
-                  (undetected-logical-error? concrete))))
+    (check-equal? (evaluate (undetected-logical-error-result? result) solution)
+                  (undetected-logical-error-result? concrete))))
+
+(test-case "circuit synthesis finds a concrete undetected repetition-code fault"
+  (define fault (find-circuit-logical-error 3 repetition-circuit))
+  (check-true (concrete? (pauli-xs fault)))
+  (check-true (concrete? (pauli-zs fault)))
+  (check-true
+   (undetected-logical-error-result?
+    (run-circuit (repetition-circuit fault)))))
+
+(test-case "circuit synthesis returns linearly independent generators"
+  (define generators (find-circuit-error-generators 3 repetition-circuit))
+  (check-true (pair? generators))
+  (check-true
+   (andmap (lambda (fault)
+             (and (concrete? (pauli-xs fault))
+                  (concrete? (pauli-zs fault))))
+           generators))
+  (check-equal? (length (reduce-generators generators))
+                (length generators)))
+
+(test-case "circuit synthesis finds no logical errors in an inert circuit"
+  (define (inert-circuit _fault) (circuit 3 '()))
+  (check-false (find-circuit-logical-error 3 inert-circuit))
+  (check-equal? (find-circuit-error-generators 3 inert-circuit) '()))
+
+(test-case "stabilizer results have no detector or observable flips"
+  (check-true (circuit-stabilizer-result? (circuit-result '() '())))
+  (check-true (circuit-stabilizer-result? (circuit-result '(#f #f) '(#f #f))))
+  (check-false (circuit-stabilizer-result? (circuit-result '(#f #t) '(#f))))
+  (check-false (circuit-stabilizer-result? (circuit-result '(#f) '(#f #t))))
+  (check-false (circuit-stabilizer-result? (circuit-result '(#t) '(#t))))
+  (check-exn exn:fail:contract? (lambda () (circuit-stabilizer-result? 'not-a-result)))
+  (define-symbolic detector-flip observable-flip boolean?)
+  (define symbolic-result (circuit-result (list detector-flip) (list observable-flip)))
+  (for* ([d '(#f #t)] [o '(#f #t)])
+    (define solution (sat (hash detector-flip d observable-flip o)))
+    (check-equal? (evaluate (circuit-stabilizer-result? symbolic-result) solution)
+                  (and (not d) (not o))))
+  (define (circuit-with-faults d o)
+    (run 2 (gate-fault 0 (pauli1 d #f)) (gate-fault 1 (pauli1 o #f))
+         (measure-qubit 0 'Z) (detector '(-1))
+         (measure-qubit 1 'Z) (observable 0 '(-1))))
+  (define symbolic-circuit-result (circuit-with-faults detector-flip observable-flip))
+  (for* ([d '(#f #t)] [o '(#f #t)])
+    (define solution (sat (hash detector-flip d observable-flip o)))
+    (check-equal? (evaluate (circuit-stabilizer-result? symbolic-circuit-result) solution)
+                  (circuit-stabilizer-result? (circuit-with-faults d o)))))
 
 (test-case "ideal Pauli and fault Pauli have distinct reference semantics"
   (define (after constructor p)

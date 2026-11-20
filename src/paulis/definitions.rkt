@@ -29,13 +29,24 @@
   (pauli1 (bool-at i (pauli-xs P))
           (bool-at i (pauli-zs P))))
 
+;; Usage: (define-symbolic-pauli1 name)
+(define-syntax (define-symbolic-pauli1 stx)
+  (syntax-case stx ()
+    [(_ name)
+     (with-syntax ([(x z) (generate-temporaries #'(name name))])
+       #'(begin
+           (define-symbolic* x boolean?)
+           (define-symbolic* z boolean?)
+           (define name (pauli1 x z))))]))
+
+;; Usage: (define-symbolic-pauli name n)
 (define-syntax (define-symbolic-pauli stx)
   (syntax-case stx ()
     [(_ name n)
      (with-syntax ([(xs zs) (generate-temporaries #'(name name))])
        #'(begin
-           (define-symbolic xs (bitvector n))
-           (define-symbolic zs (bitvector n))
+           (define-symbolic* xs (bitvector n))
+           (define-symbolic* zs (bitvector n))
            (define name (pauli n xs zs))))]))
 
 (define (bits->pauli n i bx bz)
