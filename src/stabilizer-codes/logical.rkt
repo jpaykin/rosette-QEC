@@ -83,7 +83,7 @@
     (not (member P except-arg))
   ))
 
-(define (find-decoder-logical-error decoder generators #:exept [except-arg '()])
+(define (find-decoder-logical-error decoder generators #:except [except-arg '()])
   (unless (wf-decoder? decoder generators)
     (raise-argument-error
       'find-decoder-logical-error
