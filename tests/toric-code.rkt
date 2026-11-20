@@ -175,7 +175,8 @@
 
 (test-case "toric-code returns commuting stabilizers"
   (define generators (toric-code 3))
-  (check-equal? (length generators) 18)
+  ; typically 18 non-independent stabilizers, but only 16 linearly independent stabilizers
+  (check-equal? (length generators) 16)
   (for* ([i (in-range (length generators))]
          [j (in-range (add1 i) (length generators))])
     (check-true (commute? (list-ref generators i)
@@ -183,7 +184,7 @@
 
 (test-case "larger square toric code has expected generator width and count"
   (define generators (toric-code 4))
-  (check-equal? (length generators) 32)
+  (check-equal? (length generators) 30)
   (for ([generator (in-list generators)])
     (check-equal? (pauli-width generator) 32))
   (for* ([i (in-range (length generators))]

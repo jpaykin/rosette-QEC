@@ -2,7 +2,18 @@
 
 (require rackunit
          rosette
-         "../src/paulis/definitions.rkt")
+         "../src/paulis/definitions.rkt"
+         (only-in "../src/paulis/synthesis.rkt" pauli-property?))
+
+(test-case "Pauli properties accept #:except as a required or optional keyword"
+  (check-true (pauli-property? (lambda (p #:except seen) #t)))
+  (check-true (pauli-property? (lambda (p #:except [seen '()]) #t)))
+  (check-false (pauli-property? 'not-a-procedure))
+  (check-false (pauli-property? (lambda () #t)))
+  (check-false (pauli-property? (lambda (p seen) #t)))
+  (check-false (pauli-property? (lambda (p) #t)))
+  (check-false (pauli-property? (lambda (p #:other required) #t)))
+  (check-true (pauli-property? (lambda (p #:except seen) (error "must not be called")))))
 
 (test-case "Pauli symbol conversion round-trips"
   (define symbols '(I X Z Y))

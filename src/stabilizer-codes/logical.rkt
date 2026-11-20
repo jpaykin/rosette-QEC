@@ -22,7 +22,7 @@
   )
 
   (define width (pauli-width (first generators)))
-  (define (prop P) (logical-error? P generators))
+  (define (prop P #:except grp) (logical-error? P generators #:except grp))
   (synthesize-pauli width prop #:except seen)
   )
 
@@ -36,7 +36,8 @@
 
   (define generators-reduced (reduce-generators generators))
   (define width (pauli-width (first generators)))
-  (define (prop P) (logical-error? P generators))
+  (define (prop P #:except [grp '()]) (logical-error? P generators #:except grp))
+  
   (synthesize-generators width prop)
 )
 
@@ -99,7 +100,8 @@
 
   
   (define width (pauli-width (first generators)))
-  (define (prop P) (decoder-logical-error? P decoder generators #:except except-arg))
+  (define (prop P #:except grp) (decoder-logical-error? P decoder generators #:except grp))
+
   (synthesize-pauli width prop #:except except-arg)
 )
 
@@ -110,6 +112,6 @@
     decoder)
     )
   (define width (pauli-width (first generators)))
-  (define (prop P) (decoder-logical-error? P decoder generators))
+  (define (prop P #:except grp) (decoder-logical-error? P decoder generators #:except grp))
   (synthesize-generators width prop)
 )

@@ -38,6 +38,8 @@
 
   ;(pauli->symbols (find-decoder-logical-error repetition-code-decoder repetition-code))
 
+  ;(println (find-logical-error repetition-code))
+
 
   (printf "Generators of logical-errors for repetition code:\n")
   (print-paulis 
